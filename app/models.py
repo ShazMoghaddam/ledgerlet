@@ -5,3 +5,4 @@ table. When you add a module with tables, add one import line below.
 """
 
 from app.modules.properties.models import Property  # noqa: F401
+from app.modules.transactions.models import Transaction  # noqa: F401

@@ -40,6 +40,16 @@ the HTTP error mapping, and the current-landlord dependency).
 | Ownership percentage on property | Jointly owned property is common and tax splits by share |
 | Model for portfolio, launch for one property | No rewrite needed as landlords grow |
 | `X-Landlord-Id` header | Temporary stand-in for auth; only `app/core/security.py` changes later |
+| Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
+| Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
+| Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
+| Amounts always positive; direction comes from category | One source of truth for income vs expense |
+| Full amounts recorded, ownership share applied later | Records match the bank; tax module applies the joint-ownership split |
+| Locked transactions after HMRC submission | Corrections become new entries, never silent edits |
+| `source` on every transaction | Manual, CSV and open banking are interchangeable ways in |
+| Modules talk via services, not each other's tables | Transactions asks PropertyService about ownership; boundaries stay clean |
+| UK date for business rules (`Europe/London`) | "Today" for a landlord is a UK date, not a UTC one |
+| Migrations hard-code enum values | A migration is a frozen snapshot of what it created |
 
 ## Running locally (macOS)
 
@@ -80,8 +90,10 @@ A phase is done when all four commands above pass, on SQLite **and** Postgres.
 
 ## Roadmap
 
-1. Properties module (this phase)
-2. Transactions module: income/expenses per property, HMRC categories, manual entry + CSV import behind a source interface
+1. Properties module (done)
+2. Transactions module
+   - 2a. Core: manual entry, HMRC categories, integer pence, locking (this phase)
+   - 2b. CSV bank-statement import as a second source
 3. Tax module: tax years, quarterly periods, totals
 4. Auth + landlords: replaces the header stand-in
 5. HMRC MTD submission module (sandbox first)

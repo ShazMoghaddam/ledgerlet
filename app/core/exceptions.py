@@ -20,3 +20,7 @@ class NotFoundError(DomainError):
 
 class ConflictError(DomainError):
     """The request clashes with current state, e.g. a duplicate or an archived record."""
+
+
+class BusinessRuleError(DomainError):
+    """Well-formed input that breaks a rule needing context, e.g. a future-dated transaction."""

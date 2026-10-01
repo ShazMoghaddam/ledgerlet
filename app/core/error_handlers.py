@@ -3,11 +3,12 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
-from app.core.exceptions import ConflictError, DomainError, NotFoundError
+from app.core.exceptions import BusinessRuleError, ConflictError, DomainError, NotFoundError
 
 _STATUS_BY_ERROR: dict[type[DomainError], int] = {
     NotFoundError: status.HTTP_404_NOT_FOUND,
     ConflictError: status.HTTP_409_CONFLICT,
+    BusinessRuleError: 422,  # literal: Starlette renamed this constant between versions
 }
 
 
