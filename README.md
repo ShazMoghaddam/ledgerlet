@@ -22,6 +22,9 @@ models.py       Data model        SQLAlchemy table definition
 
 Rule: each layer only talks to the one directly below it.
 
+The `imports` module is the exception: it owns no tables and works only through
+the other modules' services.
+
 Shared plumbing lives in `app/core/` (settings, DB session, domain errors,
 the HTTP error mapping, and the current-landlord dependency).
 
@@ -50,6 +53,13 @@ the HTTP error mapping, and the current-landlord dependency).
 | Modules talk via services, not each other's tables | Transactions asks PropertyService about ownership; boundaries stay clean |
 | UK date for business rules (`Europe/London`) | "Today" for a landlord is a UK date, not a UTC one |
 | Migrations hard-code enum values | A migration is a frozen snapshot of what it created |
+| Two-step CSV import, stateless preview | Nothing is saved until the landlord confirms; no staging table to clean up |
+| Row fingerprint (sha256) + unique constraint | The same bank row can never be imported twice, enforced by the database |
+| Occurrence number in the fingerprint | Two genuinely identical rows in one statement stay distinct, and still dedup on re-import |
+| "Possible duplicate" flag on same date + amount | Catches a manual entry that the bank row would double, without blocking it |
+| Generic column mapping, no bank presets yet | Presets will be built from real, checked exports rather than guessed |
+| Bad rows reported, not fatal | One malformed line shouldn't sink a 300-row statement |
+| Imports module owns no tables | It works only through the properties and transactions services |
 
 ## Running locally (macOS)
 
@@ -92,8 +102,9 @@ A phase is done when all four commands above pass, on SQLite **and** Postgres.
 
 1. Properties module (done)
 2. Transactions module
-   - 2a. Core: manual entry, HMRC categories, integer pence, locking (this phase)
-   - 2b. CSV bank-statement import as a second source
+   - 2a. Core: manual entry, HMRC categories, integer pence, locking (done)
+   - 2b. CSV bank-statement import: preview, dedup, confirm (this phase)
+   - Later: bank presets, auto-categorisation rules, one statement across several properties, refunds
 3. Tax module: tax years, quarterly periods, totals
 4. Auth + landlords: replaces the header stand-in
 5. HMRC MTD submission module (sandbox first)

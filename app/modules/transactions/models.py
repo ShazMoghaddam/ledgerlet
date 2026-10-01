@@ -12,6 +12,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     String,
+    UniqueConstraint,
     Uuid,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -35,6 +36,13 @@ class Transaction(TimestampMixin, Base):
         CheckConstraint(f"source IN ({sql_in_list(TransactionSource)})", name="source_valid"),
         # The hot query: "this property's transactions between these dates".
         Index("ix_transactions_property_id_transaction_date", "property_id", "transaction_date"),
+        # The same bank row can never be imported twice into a property. NULLs
+        # (manual entries) don't clash with each other in Postgres or SQLite.
+        UniqueConstraint(
+            "property_id",
+            "import_fingerprint",
+            name="uq_transactions_property_id_import_fingerprint",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
@@ -60,6 +68,9 @@ class Transaction(TimestampMixin, Base):
         nullable=False,
         default=TransactionSource.MANUAL,
     )
+
+    # sha256 of the bank row (see imports/fingerprint.py); NULL for manual entries.
+    import_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     # Set when the quarter containing this transaction is submitted to HMRC.
     # Locked transactions can't be edited or deleted; corrections become new entries.

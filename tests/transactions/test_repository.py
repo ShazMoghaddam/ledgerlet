@@ -119,3 +119,20 @@ def test_database_rejects_unknown_category(db_session, property_id) -> None:
         )
         db_session.flush()
     db_session.rollback()
+
+
+def test_same_import_fingerprint_twice_in_a_property_is_rejected(
+    repo, db_session, property_id
+) -> None:
+    repo.add(make(property_id, import_fingerprint="a" * 64))
+    repo.commit()
+    with pytest.raises(IntegrityError):
+        repo.add(make(property_id, import_fingerprint="a" * 64, description="again"))
+    db_session.rollback()
+
+
+def test_many_manual_transactions_without_fingerprints_are_fine(repo, property_id) -> None:
+    repo.add(make(property_id))
+    repo.add(make(property_id))
+    repo.commit()
+    assert len(repo.list_for_property(property_id)) == 2

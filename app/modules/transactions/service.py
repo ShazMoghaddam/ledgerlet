@@ -7,7 +7,7 @@ Two collaborators, both injected as Protocols:
   transactions module learns anything about properties.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import date
 from typing import Protocol
 from uuid import UUID
@@ -89,22 +89,26 @@ class TransactionService:
         data: TransactionCreate,
         source: TransactionSource = TransactionSource.MANUAL,
     ) -> Transaction:
-        prop = self._properties.get_property(landlord_id, property_id)
-        if prop.is_archived:
-            raise ConflictError("Can't add transactions to an archived property. Restore it first.")
+        prop = self._writable_property(landlord_id, property_id)
         self._ensure_not_future(data.transaction_date)
-
-        transaction = Transaction(
-            property_id=prop.id,
-            transaction_date=data.transaction_date,
-            category=data.category,
-            description=data.description,
-            amount_pence=to_pence(data.amount),
-            source=source,
-        )
-        self._repo.add(transaction)
+        transaction = self._repo.add(self._build(prop.id, data, source))
         self._repo.commit()
         return transaction
+
+    def record_imported_transactions(
+        self,
+        landlord_id: UUID,
+        property_id: UUID,
+        items: Sequence[tuple[TransactionCreate, str]],
+        source: TransactionSource = TransactionSource.CSV_IMPORT,
+    ) -> list[Transaction]:
+        """All-or-nothing: every row is checked before any is added, then one commit."""
+        prop = self._writable_property(landlord_id, property_id)
+        for data, _ in items:
+            self._ensure_not_future(data.transaction_date)
+        created = [self._repo.add(self._build(prop.id, data, source, fp)) for data, fp in items]
+        self._repo.commit()
+        return created
 
     def update_transaction(
         self, landlord_id: UUID, transaction_id: UUID, data: TransactionUpdate
@@ -129,7 +133,30 @@ class TransactionService:
         self._repo.delete(transaction)
         self._repo.commit()
 
-    # Rules
+    # Rules and helpers
+
+    def _writable_property(self, landlord_id: UUID, property_id: UUID) -> Property:
+        prop = self._properties.get_property(landlord_id, property_id)
+        if prop.is_archived:
+            raise ConflictError("Can't add transactions to an archived property. Restore it first.")
+        return prop
+
+    @staticmethod
+    def _build(
+        property_id: UUID,
+        data: TransactionCreate,
+        source: TransactionSource,
+        import_fingerprint: str | None = None,
+    ) -> Transaction:
+        return Transaction(
+            property_id=property_id,
+            transaction_date=data.transaction_date,
+            category=data.category,
+            description=data.description,
+            amount_pence=to_pence(data.amount),
+            source=source,
+            import_fingerprint=import_fingerprint,
+        )
 
     def _ensure_not_future(self, transaction_date: date) -> None:
         if transaction_date > self._today():

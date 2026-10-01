@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.core.config import get_settings
 from app.core.error_handlers import register_error_handlers
+from app.modules.imports.router import router as imports_router
 from app.modules.properties.router import router as properties_router
 from app.modules.transactions.router import router as transactions_router
 
@@ -17,6 +18,7 @@ def create_app() -> FastAPI:
     register_error_handlers(app)
     app.include_router(properties_router, prefix=API_PREFIX)
     app.include_router(transactions_router, prefix=API_PREFIX)
+    app.include_router(imports_router, prefix=API_PREFIX)
 
     @app.get("/health", tags=["meta"])
     def health() -> dict[str, str]:
