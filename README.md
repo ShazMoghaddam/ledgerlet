@@ -55,6 +55,10 @@ the HTTP error mapping, and sign-in token verification).
 | Tokens refreshed automatically, refresh token rotated | Access tokens last 4 hours; HMRC issues a new refresh token each time |
 | A refused refresh removes the connection | A dead grant is useless; the landlord is asked to reconnect |
 | HMRC client behind a Protocol | Tests and CI never call HMRC |
+| Fraud headers as small pure formatters | HMRC rejects near-misses; each format is pinned by a test and easy to adjust |
+| HMRC's validator is the judge of the headers | Third-party header lists go stale; HMRC's sandbox says exactly what's wrong |
+| Headers we can't fill are omitted, never faked | A made-up value is worse than an honest gap the validator can flag |
+| `X-Forwarded-For` trusted only behind our own proxy | Otherwise any client could claim any IP |
 | Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
 | Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
@@ -153,8 +157,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
 3. Tax module: tax years, cumulative update periods, deadlines, year-to-date totals (done)
 4. Auth + landlords: provider-agnostic sign-in, landlord settings (done)
 5. HMRC MTD submission, sandbox first
-   - 5a-i. Connect to HMRC: OAuth, encrypted tokens, refresh (this phase)
-   - 5a-ii. Fraud prevention headers, validated by HMRC's test API
+   - 5a-i. Connect to HMRC: OAuth, encrypted tokens, refresh (done)
+   - 5a-ii. Fraud prevention headers, validated by HMRC's test API (this phase)
    - 5b. Business ID, obligations, cumulative quarterly submission, audit trail
 6. React + Vite frontend
 7. Open banking as a second transaction source

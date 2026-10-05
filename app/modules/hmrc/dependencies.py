@@ -1,17 +1,24 @@
-"""Wiring for the HMRC module. Tests override the cipher and the OAuth client."""
+"""Wiring for the HMRC module. Tests override the cipher, OAuth client and validator."""
 
+import json
+from datetime import datetime
 from functools import lru_cache
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.time import utc_now
 from app.modules.hmrc.crypto import TokenCipher
+from app.modules.hmrc.fraud import ClientDeviceInfo, Screen, ServerContext, VendorInfo
 from app.modules.hmrc.oauth import HttpxOAuthClient, OAuthClient
 from app.modules.hmrc.repository import HmrcConnectionRepository
+from app.modules.hmrc.schemas import ClientDevice
 from app.modules.hmrc.service import HmrcConnectionService, OAuthSettings
+from app.modules.hmrc.validator import FraudHeaderValidator, HttpxFraudHeaderValidator
 
 _NOT_CONFIGURED = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -59,3 +66,66 @@ def get_hmrc_service(
 
 
 HmrcServiceDep = Annotated[HmrcConnectionService, Depends(get_hmrc_service)]
+
+
+# Fraud prevention: device facts from the browser, request facts from the server.
+
+DEVICE_HEADER = "X-LedgerLet-Device"
+APP_VERSION = "0.1.0"
+
+
+def get_client_device(
+    x_ledgerlet_device: Annotated[str | None, Header()] = None,
+) -> ClientDeviceInfo:
+    if not x_ledgerlet_device:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Send the browser's device details in the {DEVICE_HEADER} header",
+        )
+    try:
+        device = ClientDevice.model_validate(json.loads(x_ledgerlet_device))
+    except (ValueError, ValidationError):
+        raise HTTPException(
+            status_code=422, detail=f"The {DEVICE_HEADER} header is not valid device JSON"
+        ) from None
+    return ClientDeviceInfo(
+        device_id=device.device_id,
+        js_user_agent=device.js_user_agent,
+        screens=tuple(
+            Screen(s.width, s.height, s.scaling_factor, s.colour_depth) for s in device.screens
+        ),
+        window_width=device.window_width,
+        window_height=device.window_height,
+        utc_offset_minutes=device.utc_offset_minutes,
+    )
+
+
+def get_server_context(request: Request) -> ServerContext:
+    settings = get_settings()
+    ip = request.client.host if request.client else "0.0.0.0"
+    port = request.client.port if request.client else None
+    forwarded = request.headers.get("x-forwarded-for")
+    if settings.trust_proxy_headers and forwarded:
+        ip = forwarded.split(",")[0].strip()  # the original client, as our own proxy saw it
+    seen_at: datetime = utc_now()
+    return ServerContext(
+        client_public_ip=ip,
+        client_public_port=port,
+        client_ip_seen_at=seen_at,
+        vendor_public_ip=settings.hmrc_vendor_public_ip,
+    )
+
+
+def get_vendor_info() -> VendorInfo:
+    return VendorInfo(product_name="LedgerLet", versions={"ledgerlet-api": APP_VERSION})
+
+
+@lru_cache
+def get_fraud_validator() -> FraudHeaderValidator:
+    return HttpxFraudHeaderValidator(get_settings().hmrc_base_url, get_oauth_client())
+
+
+ClientDeviceDep = Annotated[ClientDeviceInfo, Depends(get_client_device)]
+ServerContextDep = Annotated[ServerContext, Depends(get_server_context)]
+VendorInfoDep = Annotated[VendorInfo, Depends(get_vendor_info)]
+FraudValidatorDep = Annotated[FraudHeaderValidator, Depends(get_fraud_validator)]

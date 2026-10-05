@@ -7,12 +7,20 @@ the sealed state plus the matching cookie instead (see service.py).
 
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Response, status
+from fastapi import APIRouter, Cookie, HTTPException, Response, status
+from fastapi.responses import HTMLResponse
 
 from app.core.config import get_settings
-from app.modules.hmrc.dependencies import HmrcServiceDep
+from app.modules.hmrc.dependencies import (
+    ClientDeviceDep,
+    FraudValidatorDep,
+    HmrcServiceDep,
+    ServerContextDep,
+    VendorInfoDep,
+)
+from app.modules.hmrc.fraud import build_fraud_headers
 from app.modules.hmrc.models import HmrcConnection
-from app.modules.hmrc.schemas import ConnectionStatus, ConnectStartRead
+from app.modules.hmrc.schemas import ConnectionStatus, ConnectStartRead, FraudHeaderCheck
 from app.modules.hmrc.service import STATE_MAX_AGE_SECONDS, HmrcConnectError
 from app.modules.landlords.dependencies import CurrentLandlordId
 
@@ -63,6 +71,54 @@ def get_connection(landlord_id: CurrentLandlordId, service: HmrcServiceDep):
 @router.delete("/connection", status_code=status.HTTP_204_NO_CONTENT)
 def disconnect(landlord_id: CurrentLandlordId, service: HmrcServiceDep) -> None:
     service.disconnect(landlord_id)
+
+
+@router.post("/fraud-headers/validate", response_model=FraudHeaderCheck)
+def validate_fraud_headers(
+    landlord_id: CurrentLandlordId,
+    device: ClientDeviceDep,
+    server: ServerContextDep,
+    vendor: VendorInfoDep,
+    validator: FraudValidatorDep,
+):
+    """Build this request's fraud prevention headers and ask HMRC's sandbox to check them."""
+    headers = build_fraud_headers(device, server, vendor, landlord_id)
+    return FraudHeaderCheck(headers_sent=headers, hmrc_response=validator.validate(headers))
+
+
+@router.get("/dev/device", response_class=HTMLResponse, include_in_schema=False)
+def device_probe() -> str:
+    """Development only: shows the device JSON this browser would send.
+
+    A real frontend will gather the same facts in the same way.
+    """
+    if get_settings().environment == "production":
+        raise HTTPException(status_code=404)
+    return DEVICE_PROBE_HTML
+
+
+DEVICE_PROBE_HTML = """<!doctype html>
+<html><head><meta charset="utf-8"><title>LedgerLet device details</title>
+<style>body{font:15px system-ui;margin:2rem;max-width:60rem}
+pre{background:#f3f3f3;padding:1rem;white-space:pre-wrap;word-break:break-all}</style></head>
+<body><h1>Device details for HMRC</h1>
+<p>Copy this into the <code>X-LedgerLet-Device</code> header in Swagger.
+The device id is kept in this browser, so it stays the same next time.</p>
+<pre id="out"></pre><button onclick="navigator.clipboard.writeText(out.textContent)">Copy</button>
+<script>
+let id = localStorage.getItem("ledgerlet-device-id");
+if (!id) { id = crypto.randomUUID(); localStorage.setItem("ledgerlet-device-id", id); }
+const device = {
+  device_id: id,
+  js_user_agent: navigator.userAgent,
+  screens: [{width: screen.width, height: screen.height,
+             scaling_factor: window.devicePixelRatio, colour_depth: screen.colorDepth}],
+  window_width: window.innerWidth,
+  window_height: window.innerHeight,
+  utc_offset_minutes: -new Date().getTimezoneOffset()
+};
+document.getElementById("out").textContent = JSON.stringify(device);
+</script></body></html>"""
 
 
 def _status(connection: HmrcConnection | None) -> ConnectionStatus:

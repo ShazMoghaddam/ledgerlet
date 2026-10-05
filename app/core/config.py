@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     hmrc_scopes: str = "read:self-assessment write:self-assessment"
     hmrc_token_key: str | None = None  # Fernet key: encrypts HMRC tokens at rest
 
+    # Fraud prevention headers. Our server's public IP (unknown on a laptop; set in
+    # production). Trust X-Forwarded-For only when running behind our own proxy.
+    hmrc_vendor_public_ip: str | None = None
+    trust_proxy_headers: bool = False
+
     @model_validator(mode="after")
     def _no_dev_keys_in_production(self) -> Self:
         if self.environment == "production" and self.auth_jwks_file:

@@ -20,9 +20,19 @@ from app.core.auth import get_token_verifier
 from app.core.database import Base, get_db
 from app.main import create_app
 from app.modules.hmrc.crypto import TokenCipher
-from app.modules.hmrc.dependencies import get_oauth_client, get_oauth_settings, get_token_cipher
+from app.modules.hmrc.dependencies import (
+    get_fraud_validator,
+    get_oauth_client,
+    get_oauth_settings,
+    get_token_cipher,
+)
 from tests.auth import make_verifier
-from tests.hmrc.fakes import TEST_OAUTH_SETTINGS, TEST_TOKEN_KEY, FakeOAuthClient
+from tests.hmrc.fakes import (
+    TEST_OAUTH_SETTINGS,
+    TEST_TOKEN_KEY,
+    FakeFraudValidator,
+    FakeOAuthClient,
+)
 
 TEST_DATABASE_URL = os.getenv("LEDGERLET_TEST_DATABASE_URL", "sqlite+pysqlite:///:memory:")
 
@@ -64,7 +74,16 @@ def fake_hmrc_oauth() -> FakeOAuthClient:
 
 
 @pytest.fixture
-def client(db_session: Session, fake_hmrc_oauth: FakeOAuthClient) -> Iterator[TestClient]:
+def fake_fraud_validator() -> FakeFraudValidator:
+    return FakeFraudValidator()
+
+
+@pytest.fixture
+def client(
+    db_session: Session,
+    fake_hmrc_oauth: FakeOAuthClient,
+    fake_fraud_validator: FakeFraudValidator,
+) -> Iterator[TestClient]:
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db_session
     # Real token verification, against the test identity provider's key.
@@ -73,6 +92,7 @@ def client(db_session: Session, fake_hmrc_oauth: FakeOAuthClient) -> Iterator[Te
     app.dependency_overrides[get_oauth_client] = lambda: fake_hmrc_oauth
     app.dependency_overrides[get_token_cipher] = lambda: TokenCipher(TEST_TOKEN_KEY)
     app.dependency_overrides[get_oauth_settings] = lambda: TEST_OAUTH_SETTINGS
+    app.dependency_overrides[get_fraud_validator] = lambda: fake_fraud_validator
     with TestClient(app) as test_client:
         yield test_client
 

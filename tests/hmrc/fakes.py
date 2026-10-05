@@ -76,3 +76,14 @@ class FakeConnectionRepository:
 
     def commit(self) -> None:
         self.commit_count += 1
+
+
+class FakeFraudValidator:
+    """Records what would have been sent to HMRC and answers like a happy sandbox."""
+
+    def __init__(self) -> None:
+        self.received: list[dict[str, str]] = []
+
+    def validate(self, headers: dict[str, str]) -> dict:
+        self.received.append(dict(headers))
+        return {"http_status": 200, "code": "VALID_HEADERS", "message": "All headers appear valid"}
