@@ -10,7 +10,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 from pydantic import ValidationError
 
-from app.core.security import CurrentLandlordId
 from app.modules.imports.dependencies import ImportServiceDep
 from app.modules.imports.schemas import (
     DEFAULT_DATE_FORMAT,
@@ -19,6 +18,7 @@ from app.modules.imports.schemas import (
     ImportPreview,
     ImportResult,
 )
+from app.modules.landlords.dependencies import CurrentLandlordId
 
 MAX_UPLOAD_BYTES = 2 * 1024 * 1024
 

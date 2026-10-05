@@ -5,7 +5,9 @@ Nothing else in the codebase reads os.environ directly: it asks for Settings.
 """
 
 from functools import lru_cache
+from typing import Self
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +18,19 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "postgresql+psycopg://ledgerlet:ledgerlet@localhost:5432/ledgerlet"
     sql_echo: bool = False
+
+    # Authentication (any OpenID Connect provider). Give the JWKS URL in production;
+    # the JWKS file is only for local development with scripts/dev_auth.py.
+    auth_issuer: str | None = None
+    auth_audience: str = "ledgerlet-api"
+    auth_jwks_url: str | None = None
+    auth_jwks_file: str | None = None
+
+    @model_validator(mode="after")
+    def _no_dev_keys_in_production(self) -> Self:
+        if self.environment == "production" and self.auth_jwks_file:
+            raise ValueError("auth_jwks_file is for local development only")
+        return self
 
 
 @lru_cache

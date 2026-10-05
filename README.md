@@ -26,7 +26,7 @@ The `imports` and `tax` modules are the exception: they own no tables and work
 only through the other modules' services.
 
 Shared plumbing lives in `app/core/` (settings, DB session, domain errors,
-the HTTP error mapping, and the current-landlord dependency).
+the HTTP error mapping, and sign-in token verification).
 
 ## Key design decisions
 
@@ -42,7 +42,13 @@ the HTTP error mapping, and the current-landlord dependency).
 | Archive, never delete, properties | Financial history must survive for HMRC enquiries |
 | Ownership percentage on property | Jointly owned property is common and tax splits by share |
 | Model for portfolio, launch for one property | No rewrite needed as landlords grow |
-| `X-Landlord-Id` header | Temporary stand-in for auth; only `app/core/security.py` changes later |
+| Provider-agnostic sign-in (standard OIDC JWTs, RS256 only) | Choosing or changing identity provider is configuration, not code |
+| Landlord row created on first sign-in | No separate sign-up step; the provider owns passwords, resets and 2FA |
+| Identity is issuer + subject | A user id is only unique within the provider that issued it |
+| Every failed sign-in gets the same 401 | Telling an attacker why a forged token failed would help them |
+| Dev stand-in provider (`scripts/dev_auth.py`) | Same code path as production; refused when environment is production |
+| Data migration for pre-auth properties | The deferred foreign key is added without losing earlier data |
+| Period basis is a saved landlord setting | Explicit query value still overrides it |
 | Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
 | Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
@@ -73,6 +79,10 @@ the HTTP error mapping, and the current-landlord dependency).
 - Recording full bank amounts and deriving each joint owner's share, versus recording only the share
 - Calendar basis: where transactions dated 1 to 5 April belong
 
+## Open choices
+
+- Which identity provider to use in production (decided with the frontend)
+
 ## Running locally (macOS)
 
 Needs Python 3.11+ and Docker Desktop.
@@ -89,8 +99,14 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-API docs: http://127.0.0.1:8000/docs (add an `X-Landlord-Id` header with any UUID,
-e.g. from `uuidgen`).
+Sign-in for local development (a stand-in for a real identity provider):
+
+```bash
+python scripts/dev_auth.py init        # once; paste the printed lines into .env
+python scripts/dev_auth.py token --sub alice --email alice@example.com
+```
+
+API docs: http://127.0.0.1:8000/docs. Click **Authorize** and paste the token.
 
 ## Testing
 
@@ -118,8 +134,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
    - 2a. Core: manual entry, HMRC categories, integer pence, locking (done)
    - 2b. CSV bank-statement import: preview, dedup, confirm (done)
    - Later: bank presets, auto-categorisation rules, one statement across several properties, refunds
-3. Tax module: tax years, cumulative update periods, deadlines, year-to-date totals (this phase)
-4. Auth + landlords: replaces the header stand-in
+3. Tax module: tax years, cumulative update periods, deadlines, year-to-date totals (done)
+4. Auth + landlords: provider-agnostic sign-in, landlord settings (this phase)
 5. HMRC MTD submission module (sandbox first)
 6. React + Vite frontend
 7. Open banking as a second transaction source

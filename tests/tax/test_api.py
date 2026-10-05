@@ -6,11 +6,9 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
+from tests.auth import headers
+
 API = "/api/v1"
-
-
-def headers(landlord_id: UUID) -> dict[str, str]:
-    return {"X-Landlord-Id": str(landlord_id)}
 
 
 @pytest.fixture

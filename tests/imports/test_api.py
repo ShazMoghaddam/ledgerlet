@@ -5,6 +5,8 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
+from tests.auth import headers
+
 PROPERTIES = "/api/v1/properties"
 STATEMENT = (
     b"Date,Description,Amount\n"
@@ -14,10 +16,6 @@ STATEMENT = (
 )
 MAPPING = {"date_column": "Date", "description_column": "Description", "amount_column": "Amount"}
 CATEGORIES = {"J SMITH RENT": "rental_income", "BRITISH GAS": "premises_running_costs"}
-
-
-def headers(landlord_id: UUID) -> dict[str, str]:
-    return {"X-Landlord-Id": str(landlord_id)}
 
 
 @pytest.fixture

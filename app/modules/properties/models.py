@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, DateTime, Numeric, String, Uuid
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Numeric, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base, TimestampMixin
@@ -23,9 +23,11 @@ class Property(TimestampMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
 
-    # Owner. Becomes a foreign key to landlords.id when the auth module adds
-    # that table (a one-line migration). Indexed: every query filters on it.
-    landlord_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False, index=True)
+    # Owner. Indexed: every query filters on it. RESTRICT: a landlord with
+    # properties can't be deleted out from under them.
+    landlord_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("landlords.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
 
     nickname: Mapped[str] = mapped_column(String(100), nullable=False)
     address_line_1: Mapped[str] = mapped_column(String(200), nullable=False)

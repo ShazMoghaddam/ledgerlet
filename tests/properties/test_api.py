@@ -5,11 +5,9 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
+from tests.auth import headers
+
 URL = "/api/v1/properties"
-
-
-def headers(landlord_id: UUID) -> dict[str, str]:
-    return {"X-Landlord-Id": str(landlord_id)}
 
 
 def payload(**overrides: object) -> dict[str, object]:

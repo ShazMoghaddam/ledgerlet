@@ -9,13 +9,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.modules.transactions.models import Transaction
+from tests.auth import headers
 
 PROPERTIES = "/api/v1/properties"
 TRANSACTIONS = "/api/v1/transactions"
-
-
-def headers(landlord_id: UUID) -> dict[str, str]:
-    return {"X-Landlord-Id": str(landlord_id)}
 
 
 @pytest.fixture

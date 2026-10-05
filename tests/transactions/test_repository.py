@@ -1,18 +1,33 @@
 """Repository against a real database: filters, ordering, constraints, enum round trip."""
 
 from datetime import date
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.modules.landlords.models import Landlord
 from app.modules.properties.models import Property
 from app.modules.properties.repository import PropertyRepository
 from app.modules.transactions.categories import TransactionCategory, TransactionSource
 from app.modules.transactions.models import Transaction
 from app.modules.transactions.repository import TransactionRepository
+
+
+@pytest.fixture
+def landlord_id(db_session: Session) -> UUID:
+    """Overrides the conftest fixture: a real landlord row, needed by the foreign key."""
+    return _persist_landlord(db_session)
+
+
+
+def _persist_landlord(db_session: Session) -> UUID:
+    landlord = Landlord(auth_issuer="test", auth_subject=str(uuid4()))
+    db_session.add(landlord)
+    db_session.commit()
+    return landlord.id
 
 
 @pytest.fixture

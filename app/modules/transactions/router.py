@@ -9,7 +9,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from app.core.security import CurrentLandlordId
+from app.modules.landlords.dependencies import CurrentLandlordId
 from app.modules.transactions.categories import TransactionCategory
 from app.modules.transactions.dependencies import TransactionServiceDep
 from app.modules.transactions.schemas import (

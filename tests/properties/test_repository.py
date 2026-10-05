@@ -2,12 +2,13 @@
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.modules.landlords.models import Landlord
 from app.modules.properties.models import Property
 from app.modules.properties.repository import PropertyRepository
 
@@ -22,6 +23,24 @@ def make_property(landlord_id: UUID, **overrides: object) -> Property:
         "ownership_percentage": Decimal("100.00"),
     }
     return Property(**{**fields, **overrides})
+
+
+@pytest.fixture
+def landlord_id(db_session: Session) -> UUID:
+    """Overrides the conftest fixture: a real landlord row, needed by the foreign key."""
+    return _persist_landlord(db_session)
+
+
+@pytest.fixture
+def other_landlord_id(db_session: Session) -> UUID:
+    return _persist_landlord(db_session)
+
+
+def _persist_landlord(db_session: Session) -> UUID:
+    landlord = Landlord(auth_issuer="test", auth_subject=str(uuid4()))
+    db_session.add(landlord)
+    db_session.commit()
+    return landlord.id
 
 
 @pytest.fixture

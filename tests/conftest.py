@@ -16,8 +16,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 import app.models  # noqa: F401  (registers tables)
+from app.core.auth import get_token_verifier
 from app.core.database import Base, get_db
 from app.main import create_app
+from tests.auth import make_verifier
 
 TEST_DATABASE_URL = os.getenv("LEDGERLET_TEST_DATABASE_URL", "sqlite+pysqlite:///:memory:")
 
@@ -57,6 +59,8 @@ def db_session(engine: Engine) -> Iterator[Session]:
 def client(db_session: Session) -> Iterator[TestClient]:
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db_session
+    # Real token verification, against the test identity provider's key.
+    app.dependency_overrides[get_token_verifier] = make_verifier
     with TestClient(app) as test_client:
         yield test_client
 
