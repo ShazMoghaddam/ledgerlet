@@ -72,7 +72,8 @@ class Transaction(TimestampMixin, Base):
     # sha256 of the bank row (see imports/fingerprint.py); NULL for manual entries.
     import_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
-    # Set when the quarter containing this transaction is submitted to HMRC.
+    # Set when the tax year is finalised with HMRC (the final declaration). Until then,
+    # corrections are allowed: quarterly updates are cumulative, so the next one fixes it.
     # Locked transactions can't be edited or deleted; corrections become new entries.
     locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

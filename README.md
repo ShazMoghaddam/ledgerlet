@@ -22,8 +22,8 @@ models.py       Data model        SQLAlchemy table definition
 
 Rule: each layer only talks to the one directly below it.
 
-The `imports` module is the exception: it owns no tables and works only through
-the other modules' services.
+The `imports` and `tax` modules are the exception: they own no tables and work
+only through the other modules' services.
 
 Shared plumbing lives in `app/core/` (settings, DB session, domain errors,
 the HTTP error mapping, and the current-landlord dependency).
@@ -48,7 +48,6 @@ the HTTP error mapping, and the current-landlord dependency).
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
 | Amounts always positive; direction comes from category | One source of truth for income vs expense |
 | Full amounts recorded, ownership share applied later | Records match the bank; tax module applies the joint-ownership split |
-| Locked transactions after HMRC submission | Corrections become new entries, never silent edits |
 | `source` on every transaction | Manual, CSV and open banking are interchangeable ways in |
 | Modules talk via services, not each other's tables | Transactions asks PropertyService about ownership; boundaries stay clean |
 | UK date for business rules (`Europe/London`) | "Today" for a landlord is a UK date, not a UTC one |
@@ -60,6 +59,19 @@ the HTTP error mapping, and the current-landlord dependency).
 | Generic column mapping, no bank presets yet | Presets will be built from real, checked exports rather than guessed |
 | Bad rows reported, not fatal | One malformed line shouldn't sink a 300-row statement |
 | Imports module owns no tables | It works only through the properties and transactions services |
+| Tax periods are pure date logic | Off-by-one-day errors are the classic tax bug; every boundary is unit tested |
+| Summaries are cumulative from the year start | Matches HMRC: each quarterly update replaces the previous one |
+| Standard and calendar bases supported | HMRC allows either; the deadlines are the same |
+| Share applied per property per category, rounded half up | A written, tested rounding rule makes totals reproducible |
+| Mortgage interest excluded from expenses and profit | It is relieved as a tax credit, so it is reported separately |
+| Archived properties still count for their periods | Selling a property mid-year doesn't remove its income |
+| `ownership_percentage` is the tax share | Couples default to 50/50 unless HMRC has a Form 17 |
+| Transactions lock at year-end final declaration | Quarterly updates are cumulative, so in-year corrections must stay possible |
+
+## Open questions for an accountant
+
+- Recording full bank amounts and deriving each joint owner's share, versus recording only the share
+- Calendar basis: where transactions dated 1 to 5 April belong
 
 ## Running locally (macOS)
 
@@ -104,9 +116,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
 1. Properties module (done)
 2. Transactions module
    - 2a. Core: manual entry, HMRC categories, integer pence, locking (done)
-   - 2b. CSV bank-statement import: preview, dedup, confirm (this phase)
+   - 2b. CSV bank-statement import: preview, dedup, confirm (done)
    - Later: bank presets, auto-categorisation rules, one statement across several properties, refunds
-3. Tax module: tax years, quarterly periods, totals
+3. Tax module: tax years, cumulative update periods, deadlines, year-to-date totals (this phase)
 4. Auth + landlords: replaces the header stand-in
 5. HMRC MTD submission module (sandbox first)
 6. React + Vite frontend

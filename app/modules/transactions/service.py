@@ -166,6 +166,6 @@ class TransactionService:
     def _ensure_editable(transaction: Transaction) -> None:
         if transaction.is_locked:
             raise ConflictError(
-                "This transaction is in a period already submitted to HMRC and can't be "
+                "This transaction is in a tax year already finalised with HMRC and can't be "
                 "changed. Record a correcting transaction instead."
             )

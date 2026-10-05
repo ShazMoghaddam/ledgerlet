@@ -22,8 +22,15 @@ class PropertyCreate(BaseModel):
     address_line_2: str | None = Field(default=None, max_length=200)
     town: str = Field(min_length=1, max_length=100)
     postcode: str = Field(examples=["SW1A 1AA"])
+    # Your share for tax purposes, not necessarily the legal title. Married couples and
+    # civil partners are taxed 50/50 unless HMRC has a Form 17 declaration.
     ownership_percentage: Decimal = Field(
-        default=Decimal("100.00"), gt=0, le=100, max_digits=5, decimal_places=2
+        default=Decimal("100.00"),
+        gt=0,
+        le=100,
+        max_digits=5,
+        decimal_places=2,
+        description="Your tax share of this property's income and expenses, in percent",
     )
 
     @field_validator("postcode")
@@ -43,7 +50,12 @@ class PropertyUpdate(BaseModel):
     town: str | None = Field(default=None, min_length=1, max_length=100)
     postcode: str | None = None
     ownership_percentage: Decimal | None = Field(
-        default=None, gt=0, le=100, max_digits=5, decimal_places=2
+        default=None,
+        gt=0,
+        le=100,
+        max_digits=5,
+        decimal_places=2,
+        description="Your tax share of this property's income and expenses, in percent",
     )
 
     @field_validator("postcode")
