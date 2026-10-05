@@ -97,6 +97,7 @@ created. If your volume already existed, create it once with:
 ## Phase gate
 
 A phase is done when all four commands above pass, on SQLite **and** Postgres.
+GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
 
 ## Roadmap
 
