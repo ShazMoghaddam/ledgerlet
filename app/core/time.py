@@ -14,6 +14,11 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
+def as_utc(moment: datetime) -> datetime:
+    """Treat a naive datetime as UTC. (SQLite drops the timezone on the way back.)"""
+    return moment if moment.tzinfo is not None else moment.replace(tzinfo=UTC)
+
+
 def uk_today() -> date:
     """Today's date as a UK landlord sees it.
 

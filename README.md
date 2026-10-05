@@ -49,6 +49,12 @@ the HTTP error mapping, and sign-in token verification).
 | Dev stand-in provider (`scripts/dev_auth.py`) | Same code path as production; refused when environment is production |
 | Data migration for pre-auth properties | The deferred foreign key is added without losing earlier data |
 | Period basis is a saved landlord setting | Explicit query value still overrides it |
+| HMRC tokens encrypted at rest (Fernet) | A copy of the database alone can't act on anyone's tax affairs |
+| OAuth state sealed + bound to a browser cookie | HMRC's redirect back can't be forged, replayed or completed in another browser |
+| HMRC callback needs no LedgerLet token | It's a browser redirect; trust comes from the sealed state and cookie instead |
+| Tokens refreshed automatically, refresh token rotated | Access tokens last 4 hours; HMRC issues a new refresh token each time |
+| A refused refresh removes the connection | A dead grant is useless; the landlord is asked to reconnect |
+| HMRC client behind a Protocol | Tests and CI never call HMRC |
 | Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
 | Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
@@ -108,6 +114,16 @@ python scripts/dev_auth.py token --sub alice --email alice@example.com
 
 API docs: http://127.0.0.1:8000/docs. Click **Authorize** and paste the token.
 
+## HMRC sandbox (local development)
+
+1. Register at the HMRC Developer Hub, create a sandbox application, and subscribe it to
+   Property Business (MTD) 6.0, Obligations (MTD) 3.0, Business Details (MTD) 2.0,
+   Create Test User 1.0 and Test Fraud Prevention Headers 1.0.
+2. Add the redirect URI `http://localhost:8000/api/v1/hmrc/callback`.
+3. Put `LEDGERLET_HMRC_CLIENT_ID`, `LEDGERLET_HMRC_CLIENT_SECRET` and `LEDGERLET_HMRC_TOKEN_KEY`
+   in `.env` (see `.env.example`).
+4. `python scripts/hmrc_test_user.py` creates a sandbox individual to sign in to HMRC as.
+
 ## Testing
 
 ```bash
@@ -135,7 +151,10 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
    - 2b. CSV bank-statement import: preview, dedup, confirm (done)
    - Later: bank presets, auto-categorisation rules, one statement across several properties, refunds
 3. Tax module: tax years, cumulative update periods, deadlines, year-to-date totals (done)
-4. Auth + landlords: provider-agnostic sign-in, landlord settings (this phase)
-5. HMRC MTD submission module (sandbox first)
+4. Auth + landlords: provider-agnostic sign-in, landlord settings (done)
+5. HMRC MTD submission, sandbox first
+   - 5a-i. Connect to HMRC: OAuth, encrypted tokens, refresh (this phase)
+   - 5a-ii. Fraud prevention headers, validated by HMRC's test API
+   - 5b. Business ID, obligations, cumulative quarterly submission, audit trail
 6. React + Vite frontend
 7. Open banking as a second transaction source

@@ -26,6 +26,15 @@ class Settings(BaseSettings):
     auth_jwks_url: str | None = None
     auth_jwks_file: str | None = None
 
+    # HMRC (Making Tax Digital). Defaults point at HMRC's sandbox.
+    hmrc_base_url: str = "https://test-api.service.hmrc.gov.uk"
+    hmrc_authorize_url: str = "https://test-www.tax.service.gov.uk/oauth/authorize"
+    hmrc_client_id: str | None = None
+    hmrc_client_secret: str | None = None
+    hmrc_redirect_uri: str = "http://localhost:8000/api/v1/hmrc/callback"
+    hmrc_scopes: str = "read:self-assessment write:self-assessment"
+    hmrc_token_key: str | None = None  # Fernet key: encrypts HMRC tokens at rest
+
     @model_validator(mode="after")
     def _no_dev_keys_in_production(self) -> Self:
         if self.environment == "production" and self.auth_jwks_file:
