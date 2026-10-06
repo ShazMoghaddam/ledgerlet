@@ -22,6 +22,7 @@ from app.main import create_app
 from app.modules.hmrc.crypto import TokenCipher
 from app.modules.hmrc.dependencies import (
     get_fraud_validator,
+    get_hmrc_api,
     get_oauth_client,
     get_oauth_settings,
     get_token_cipher,
@@ -31,6 +32,7 @@ from tests.hmrc.fakes import (
     TEST_OAUTH_SETTINGS,
     TEST_TOKEN_KEY,
     FakeFraudValidator,
+    FakeHmrcApi,
     FakeOAuthClient,
 )
 
@@ -79,10 +81,16 @@ def fake_fraud_validator() -> FakeFraudValidator:
 
 
 @pytest.fixture
+def fake_hmrc_api() -> FakeHmrcApi:
+    return FakeHmrcApi()
+
+
+@pytest.fixture
 def client(
     db_session: Session,
     fake_hmrc_oauth: FakeOAuthClient,
     fake_fraud_validator: FakeFraudValidator,
+    fake_hmrc_api: FakeHmrcApi,
 ) -> Iterator[TestClient]:
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db_session
@@ -93,6 +101,7 @@ def client(
     app.dependency_overrides[get_token_cipher] = lambda: TokenCipher(TEST_TOKEN_KEY)
     app.dependency_overrides[get_oauth_settings] = lambda: TEST_OAUTH_SETTINGS
     app.dependency_overrides[get_fraud_validator] = lambda: fake_fraud_validator
+    app.dependency_overrides[get_hmrc_api] = lambda: fake_hmrc_api
     with TestClient(app) as test_client:
         yield test_client
 

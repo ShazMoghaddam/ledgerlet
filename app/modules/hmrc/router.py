@@ -11,18 +11,33 @@ from fastapi import APIRouter, Cookie, HTTPException, Response, status
 from fastapi.responses import HTMLResponse
 
 from app.core.config import get_settings
+from app.core.time import utc_now
 from app.modules.hmrc.dependencies import (
     ClientDeviceDep,
+    FraudHeadersDep,
     FraudValidatorDep,
     HmrcServiceDep,
     ServerContextDep,
+    TaxpayerServiceDep,
     VendorInfoDep,
 )
 from app.modules.hmrc.fraud import build_fraud_headers
-from app.modules.hmrc.models import HmrcConnection
-from app.modules.hmrc.schemas import ConnectionStatus, ConnectStartRead, FraudHeaderCheck
+from app.modules.hmrc.models import HmrcConnection, HmrcTaxpayer
+from app.modules.hmrc.schemas import (
+    BusinessIdIn,
+    BusinessRead,
+    ConnectionStatus,
+    ConnectStartRead,
+    DiscoveryRead,
+    FraudHeaderCheck,
+    HmrcObligationRead,
+    HmrcObligationsRead,
+    NinoIn,
+    TaxpayerRead,
+)
 from app.modules.hmrc.service import STATE_MAX_AGE_SECONDS, HmrcConnectError
 from app.modules.landlords.dependencies import CurrentLandlordId
+from app.modules.tax.periods import PeriodBasis, tax_year_containing, update_period
 
 router = APIRouter(prefix="/hmrc", tags=["hmrc"])
 
@@ -86,6 +101,68 @@ def validate_fraud_headers(
     return FraudHeaderCheck(headers_sent=headers, hmrc_response=validator.validate(headers))
 
 
+@router.get("/taxpayer", response_model=TaxpayerRead)
+def get_taxpayer(landlord_id: CurrentLandlordId, service: TaxpayerServiceDep):
+    return _taxpayer(service, service.profile(landlord_id))
+
+
+@router.put("/taxpayer", response_model=TaxpayerRead)
+def set_nino(payload: NinoIn, landlord_id: CurrentLandlordId, service: TaxpayerServiceDep):
+    return _taxpayer(service, service.set_nino(landlord_id, payload.nino))
+
+
+@router.put("/taxpayer/business", response_model=TaxpayerRead)
+def set_business(
+    payload: BusinessIdIn, landlord_id: CurrentLandlordId, service: TaxpayerServiceDep
+):
+    return _taxpayer(service, service.set_business(landlord_id, payload.business_id))
+
+
+@router.post("/businesses/discover", response_model=DiscoveryRead)
+def discover_businesses(
+    landlord_id: CurrentLandlordId, fraud_headers: FraudHeadersDep, service: TaxpayerServiceDep
+):
+    """Ask HMRC which businesses this landlord has; auto-select a single UK property one."""
+    businesses, taxpayer = service.discover_businesses(landlord_id, fraud_headers)
+    return DiscoveryRead(
+        businesses=[
+            BusinessRead(
+                business_id=b.business_id,
+                type_of_business=b.type_of_business,
+                trading_name=b.trading_name,
+            )
+            for b in businesses
+        ],
+        selected_business_id=taxpayer.uk_property_business_id,
+    )
+
+
+@router.get("/obligations", response_model=HmrcObligationsRead)
+def get_obligations(
+    landlord_id: CurrentLandlordId,
+    fraud_headers: FraudHeadersDep,
+    service: TaxpayerServiceDep,
+    tax_year: int | None = None,
+):
+    """HMRC's own list of quarterly updates due for this landlord's UK property business."""
+    year = tax_year if tax_year is not None else tax_year_containing(utc_now().date())
+    whole_year = update_period(year, 4, PeriodBasis.STANDARD)
+    found, raw = service.obligations(landlord_id, fraud_headers, whole_year.start, whole_year.end)
+    return HmrcObligationsRead(
+        obligations=[
+            HmrcObligationRead(
+                period_start=o.period_start,
+                period_end=o.period_end,
+                due=o.due,
+                status=o.status,
+                received=o.received,
+            )
+            for o in found
+        ],
+        hmrc_response=raw,
+    )
+
+
 @router.get("/dev/device", response_class=HTMLResponse, include_in_schema=False)
 def device_probe() -> str:
     """Development only: shows the device JSON this browser would send.
@@ -119,6 +196,15 @@ const device = {
 };
 document.getElementById("out").textContent = JSON.stringify(device);
 </script></body></html>"""
+
+
+def _taxpayer(service, taxpayer: HmrcTaxpayer | None) -> TaxpayerRead:
+    if taxpayer is None:
+        return TaxpayerRead(nino=None, uk_property_business_id=None)
+    return TaxpayerRead(
+        nino=service.masked_nino(taxpayer),
+        uk_property_business_id=taxpayer.uk_property_business_id,
+    )
 
 
 def _status(connection: HmrcConnection | None) -> ConnectionStatus:

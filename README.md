@@ -59,6 +59,11 @@ the HTTP error mapping, and sign-in token verification).
 | HMRC's validator is the judge of the headers | Third-party header lists go stale; HMRC's sandbox says exactly what's wrong |
 | Headers we can't fill are omitted, never faked | A made-up value is worse than an honest gap the validator can flag |
 | `X-Forwarded-For` trusted only behind our own proxy | Otherwise any client could claim any IP |
+| NINO encrypted at rest, validated, only ever shown masked | It's a sensitive identifier; `OE****77A` is enough to recognise |
+| HMRC identity kept apart from the HMRC connection | Losing a token shouldn't mean re-entering a NINO |
+| HMRC endpoints and versions in one file | A path or version change at HMRC is a one-line fix |
+| HMRC errors passed on with HMRC's reference (502) | The landlord or support can quote it to HMRC |
+| Raw HMRC response returned alongside our parsed view | Our parsing can always be checked against HMRC's own words |
 | Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
 | Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
@@ -158,7 +163,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
 4. Auth + landlords: provider-agnostic sign-in, landlord settings (done)
 5. HMRC MTD submission, sandbox first
    - 5a-i. Connect to HMRC: OAuth, encrypted tokens, refresh (done)
-   - 5a-ii. Fraud prevention headers, validated by HMRC's test API (this phase)
-   - 5b. Business ID, obligations, cumulative quarterly submission, audit trail
+   - 5a-ii. Fraud prevention headers, validated by HMRC's test API (done)
+   - 5b-i. NINO, business discovery, obligations (read-only) (this phase)
+   - 5b-ii. Cumulative quarterly submission and audit trail
+   - Later: Gov-Client-Multi-Factor (with the chosen identity provider), Gov-Vendor-License-IDs
 6. React + Vite frontend
 7. Open banking as a second transaction source

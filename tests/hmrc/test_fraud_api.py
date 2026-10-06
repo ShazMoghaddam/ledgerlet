@@ -7,16 +7,10 @@ from fastapi.testclient import TestClient
 
 import app.modules.hmrc.dependencies as deps
 from tests.auth import headers
+from tests.hmrc.fakes import TEST_DEVICE
 
 URL = "/api/v1/hmrc/fraud-headers/validate"
-DEVICE = {
-    "device_id": "beec798b-b366-47fa-b1f8-92cead59b56e",
-    "js_user_agent": "Mozilla/5.0 (Macintosh)",
-    "screens": [{"width": 1512, "height": 982, "scaling_factor": 2, "colour_depth": 30}],
-    "window_width": 1512,
-    "window_height": 860,
-    "utc_offset_minutes": 60,
-}
+DEVICE = TEST_DEVICE
 
 
 def with_device(who: str = "alice", device: dict | str = DEVICE) -> dict[str, str]:

@@ -22,5 +22,9 @@ class ConflictError(DomainError):
     """The request clashes with current state, e.g. a duplicate or an archived record."""
 
 
+class UpstreamError(DomainError):
+    """An outside service (such as HMRC) refused or failed. Its own message is passed on."""
+
+
 class BusinessRuleError(DomainError):
     """Well-formed input that breaks a rule needing context, e.g. a future-dated transaction."""

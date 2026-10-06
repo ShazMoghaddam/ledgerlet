@@ -31,3 +31,20 @@ class HmrcConnection(TimestampMixin, Base):
 
     def __repr__(self) -> str:
         return f"<HmrcConnection landlord={self.landlord_id}>"
+
+
+class HmrcTaxpayer(TimestampMixin, Base):
+    """Who the landlord is at HMRC: their NINO (encrypted) and UK property business id.
+
+    Kept apart from HmrcConnection on purpose: disconnecting from HMRC, or an expired
+    grant, removes the tokens but shouldn't make the landlord re-enter their NINO.
+    """
+
+    __tablename__ = "hmrc_taxpayers"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    landlord_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("landlords.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    nino_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
+    uk_property_business_id: Mapped[str | None] = mapped_column(String(32), nullable=True)

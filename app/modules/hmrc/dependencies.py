@@ -12,13 +12,22 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.time import utc_now
+from app.modules.hmrc.api import HmrcApi, HttpxHmrcApi
 from app.modules.hmrc.crypto import TokenCipher
-from app.modules.hmrc.fraud import ClientDeviceInfo, Screen, ServerContext, VendorInfo
+from app.modules.hmrc.fraud import (
+    ClientDeviceInfo,
+    Screen,
+    ServerContext,
+    VendorInfo,
+    build_fraud_headers,
+)
 from app.modules.hmrc.oauth import HttpxOAuthClient, OAuthClient
-from app.modules.hmrc.repository import HmrcConnectionRepository
+from app.modules.hmrc.repository import HmrcConnectionRepository, HmrcTaxpayerRepository
 from app.modules.hmrc.schemas import ClientDevice
 from app.modules.hmrc.service import HmrcConnectionService, OAuthSettings
+from app.modules.hmrc.taxpayer import HmrcTaxpayerService
 from app.modules.hmrc.validator import FraudHeaderValidator, HttpxFraudHeaderValidator
+from app.modules.landlords.dependencies import CurrentLandlordId
 
 _NOT_CONFIGURED = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -129,3 +138,33 @@ ClientDeviceDep = Annotated[ClientDeviceInfo, Depends(get_client_device)]
 ServerContextDep = Annotated[ServerContext, Depends(get_server_context)]
 VendorInfoDep = Annotated[VendorInfo, Depends(get_vendor_info)]
 FraudValidatorDep = Annotated[FraudHeaderValidator, Depends(get_fraud_validator)]
+
+
+
+def get_fraud_headers(
+    landlord_id: CurrentLandlordId,
+    device: ClientDeviceDep,
+    server: ServerContextDep,
+    vendor: VendorInfoDep,
+) -> dict[str, str]:
+    return build_fraud_headers(device, server, vendor, landlord_id)
+
+
+FraudHeadersDep = Annotated[dict[str, str], Depends(get_fraud_headers)]
+
+
+@lru_cache
+def get_hmrc_api() -> HmrcApi:
+    return HttpxHmrcApi(get_settings().hmrc_base_url)
+
+
+def get_taxpayer_service(
+    db: Annotated[Session, Depends(get_db)],
+    connections: HmrcServiceDep,
+    cipher: Annotated[TokenCipher, Depends(get_token_cipher)],
+    hmrc: Annotated[HmrcApi, Depends(get_hmrc_api)],
+) -> HmrcTaxpayerService:
+    return HmrcTaxpayerService(HmrcTaxpayerRepository(db), connections, hmrc, cipher)
+
+
+TaxpayerServiceDep = Annotated[HmrcTaxpayerService, Depends(get_taxpayer_service)]
