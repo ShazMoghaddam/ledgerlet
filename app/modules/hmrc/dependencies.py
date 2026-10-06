@@ -164,7 +164,15 @@ def get_taxpayer_service(
     cipher: Annotated[TokenCipher, Depends(get_token_cipher)],
     hmrc: Annotated[HmrcApi, Depends(get_hmrc_api)],
 ) -> HmrcTaxpayerService:
-    return HmrcTaxpayerService(HmrcTaxpayerRepository(db), connections, hmrc, cipher)
+    settings = get_settings()
+    return HmrcTaxpayerService(
+        HmrcTaxpayerRepository(db),
+        connections,
+        hmrc,
+        cipher,
+        sandbox="test-api." in settings.hmrc_base_url,
+        obligations_test_scenario=settings.hmrc_obligations_test_scenario,
+    )
 
 
 TaxpayerServiceDep = Annotated[HmrcTaxpayerService, Depends(get_taxpayer_service)]

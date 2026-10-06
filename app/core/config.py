@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     # Fraud prevention headers. Our server's public IP (unknown on a laptop; set in
     # production). Trust X-Forwarded-For only when running behind our own proxy.
     hmrc_vendor_public_ip: str | None = None
+
+    # Sandbox only: Gov-Test-Scenario for the obligations call (e.g. STATEFUL). Ignored in
+    # production. Business discovery always asks the sandbox for STATEFUL data.
+    hmrc_obligations_test_scenario: str | None = None
     trust_proxy_headers: bool = False
 
     @model_validator(mode="after")

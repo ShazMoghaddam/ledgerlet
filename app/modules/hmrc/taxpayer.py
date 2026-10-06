@@ -65,11 +65,15 @@ class HmrcTaxpayerService:
         tokens: AccessTokens,
         hmrc: HmrcApi,
         cipher: TokenCipher,
+        sandbox: bool = False,
+        obligations_test_scenario: str | None = None,
     ) -> None:
         self._repo = repository
         self._tokens = tokens
         self._hmrc = hmrc
         self._cipher = cipher
+        self._sandbox = sandbox
+        self._obligations_scenario = obligations_test_scenario
 
     # The landlord's details
 
@@ -111,6 +115,7 @@ class HmrcTaxpayerService:
             api.LIST_BUSINESSES.format(nino=self._nino(taxpayer)),
             api.BUSINESS_DETAILS_VERSION,
             fraud_headers,
+            test_scenario=api.STATEFUL if self._sandbox else None,
         )
         businesses = [
             Business(
@@ -134,43 +139,58 @@ class HmrcTaxpayerService:
         date_from: date,
         date_to: date,
     ) -> tuple[list[Obligation], dict[str, Any]]:
+        """HMRC's quarterly obligations for this landlord's UK property business.
+
+        Production: filtered by business id and dates at HMRC, and checked again here.
+        Sandbox in DYNAMIC mode: HMRC only generates obligations for its own example
+        businesses and rejects any filter, so we ask unfiltered and pick the UK
+        property group and the requested dates ourselves.
+        """
         taxpayer = self._require(landlord_id)
-        if not taxpayer.uk_property_business_id:
+        business_id = taxpayer.uk_property_business_id
+        if not business_id:
             raise HmrcProfileMissingError(
                 "Choose your UK property business first (discover businesses)"
             )
-        response = self._get(
+        scenario = self._obligations_scenario if self._sandbox else None
+        sandbox_dynamic = scenario == "DYNAMIC"
+        params = (
+            {}
+            if sandbox_dynamic
+            else {
+                "typeOfBusiness": UK_PROPERTY,
+                "businessId": business_id,
+                "fromDate": date_from.isoformat(),
+                "toDate": date_to.isoformat(),
+            }
+        )
+        response = self._call(
             landlord_id,
-            "show your obligations",
             api.OBLIGATIONS.format(nino=self._nino(taxpayer)),
             api.OBLIGATIONS_VERSION,
             fraud_headers,
-            params={
-                "typeOfBusiness": UK_PROPERTY,
-                "businessId": taxpayer.uk_property_business_id,
-                "fromDate": date_from.isoformat(),
-                "toDate": date_to.isoformat(),
-            },
+            params,
+            scenario,
         )
-        found: list[Obligation] = []
+        if response.status_code == 404 and response.body.get("code") == "NO_OBLIGATIONS_FOUND":
+            return [], response.body  # nothing due is an answer, not an error
+        if not response.ok:
+            raise HmrcApiError("show your obligations", response)
+
+        found: dict[tuple[date, date], Obligation] = {}
         for group in response.body.get("obligations", []):
-            for d in group.get("obligationDetails", []) if isinstance(group, dict) else []:
-                try:
-                    found.append(
-                        Obligation(
-                            period_start=date.fromisoformat(d["periodStartDate"]),
-                            period_end=date.fromisoformat(d["periodEndDate"]),
-                            due=date.fromisoformat(d["dueDate"]),
-                            status=str(d.get("status", "")),
-                            received=date.fromisoformat(d["receivedDate"])
-                            if d.get("receivedDate")
-                            else None,
-                        )
-                    )
-                except (KeyError, TypeError, ValueError):
-                    continue  # keep the raw body below; never drop HMRC's data silently
-        found.sort(key=lambda o: o.period_start)
-        return found, response.body
+            if not isinstance(group, dict) or group.get("typeOfBusiness") != UK_PROPERTY:
+                continue
+            if not sandbox_dynamic and group.get("businessId") not in (None, business_id):
+                continue
+            for d in group.get("obligationDetails", []):
+                obligation = _parse_obligation(d)
+                if obligation is None:
+                    continue  # the raw body below still holds it
+                if obligation.period_start < date_from or obligation.period_end > date_to:
+                    continue
+                found.setdefault((obligation.period_start, obligation.period_end), obligation)
+        return sorted(found.values(), key=lambda o: o.period_end), response.body
 
     # Helpers
 
@@ -191,9 +211,36 @@ class HmrcTaxpayerService:
         version: str,
         fraud_headers: dict[str, str],
         params: dict[str, str] | None = None,
+        test_scenario: str | None = None,
     ) -> HmrcResponse:
-        token = self._tokens.access_token(landlord_id)  # 409 if not connected
-        response = self._hmrc.get(path, version, token, fraud_headers, params)
+        response = self._call(landlord_id, path, version, fraud_headers, params, test_scenario)
         if not response.ok:
             raise HmrcApiError(action, response)
         return response
+
+    def _call(
+        self,
+        landlord_id: UUID,
+        path: str,
+        version: str,
+        fraud_headers: dict[str, str],
+        params: dict[str, str] | None = None,
+        test_scenario: str | None = None,
+    ) -> HmrcResponse:
+        token = self._tokens.access_token(landlord_id)  # 409 if not connected
+        return self._hmrc.get(path, version, token, fraud_headers, params, test_scenario)
+
+
+def _parse_obligation(raw: object) -> Obligation | None:
+    if not isinstance(raw, dict):
+        return None
+    try:
+        return Obligation(
+            period_start=date.fromisoformat(raw["periodStartDate"]),
+            period_end=date.fromisoformat(raw["periodEndDate"]),
+            due=date.fromisoformat(raw["dueDate"]),
+            status=str(raw.get("status", "")),
+            received=date.fromisoformat(raw["receivedDate"]) if raw.get("receivedDate") else None,
+        )
+    except (KeyError, TypeError, ValueError):
+        return None

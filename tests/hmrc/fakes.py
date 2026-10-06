@@ -125,8 +125,9 @@ class FakeHmrcApi:
             },
         ]
         self.fail_with: tuple[int, dict] | None = None
+        self.extra_groups: list[dict] = []  # other businesses' obligations HMRC may include
 
-    def get(self, path, version, access_token, fraud_headers, params=None):
+    def get(self, path, version, access_token, fraud_headers, params=None, test_scenario=None):
         self.calls.append(
             {
                 "path": path,
@@ -134,6 +135,7 @@ class FakeHmrcApi:
                 "token": access_token,
                 "fraud_headers": dict(fraud_headers),
                 "params": dict(params or {}),
+                "test_scenario": test_scenario,
             }
         )
         if self.fail_with:
@@ -149,7 +151,8 @@ class FakeHmrcApi:
                         "typeOfBusiness": "uk-property",
                         "businessId": "XPIS12345678901",
                         "obligationDetails": self.obligation_details,
-                    }
+                    },
+                    *self.extra_groups,
                 ]
             },
             "corr-2",

@@ -18,6 +18,10 @@ OBLIGATIONS = "/obligations/details/{nino}/income-and-expenditure"
 
 TIMEOUT_SECONDS = 20.0
 
+# HMRC's sandbox returns canned example data unless asked for the "stateful" view,
+# which reflects test data we created (e.g. via the Test Support API).
+STATEFUL = "STATEFUL"
+
 
 @dataclass(frozen=True)
 class HmrcResponse:
@@ -38,12 +42,14 @@ class HmrcApi(Protocol):
         access_token: str,
         fraud_headers: dict[str, str],
         params: dict[str, str] | None = None,
+        test_scenario: str | None = None,
     ) -> HmrcResponse: ...
 
 
 class HttpxHmrcApi:
     def __init__(self, base_url: str) -> None:
         self._base = base_url.rstrip("/")
+        self._sandbox = "test-api." in self._base
 
     def get(
         self,
@@ -52,12 +58,15 @@ class HttpxHmrcApi:
         access_token: str,
         fraud_headers: dict[str, str],
         params: dict[str, str] | None = None,
+        test_scenario: str | None = None,
     ) -> HmrcResponse:
         headers = {
             **fraud_headers,
             "Authorization": f"Bearer {access_token}",
             "Accept": f"application/vnd.hmrc.{version}+json",
         }
+        if test_scenario and self._sandbox:  # never sent to production, whatever the caller asks
+            headers["Gov-Test-Scenario"] = test_scenario
         response = httpx.get(
             f"{self._base}{path}", headers=headers, params=params, timeout=TIMEOUT_SECONDS
         )

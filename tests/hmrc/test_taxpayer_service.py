@@ -124,3 +124,111 @@ def test_needs_an_hmrc_connection(repo, api, cipher, landlord_id) -> None:
     with pytest.raises(HmrcNotConnectedError):
         service.discover_businesses(landlord_id, FRAUD)
     assert api.calls == []  # never called HMRC without a token
+
+
+def test_sandbox_discovery_asks_for_stateful_data(repo, tokens, api, cipher, landlord_id) -> None:
+    service = HmrcTaxpayerService(repo, tokens, api, cipher, sandbox=True)
+    service.set_nino(landlord_id, "OE180677A")
+    service.discover_businesses(landlord_id, FRAUD)
+    assert api.calls[-1]["test_scenario"] == "STATEFUL"
+
+
+def test_production_never_sends_test_scenarios(repo, tokens, api, cipher, landlord_id) -> None:
+    service = HmrcTaxpayerService(
+        repo, tokens, api, cipher, sandbox=False, obligations_test_scenario="STATEFUL"
+    )
+    service.set_nino(landlord_id, "OE180677A")
+    service.discover_businesses(landlord_id, FRAUD)
+    service.obligations(landlord_id, FRAUD, *YEAR)
+    assert {c["test_scenario"] for c in api.calls} == {None}
+
+
+def test_obligations_scenario_is_configurable_in_sandbox(
+    repo, tokens, api, cipher, landlord_id
+) -> None:
+    service = HmrcTaxpayerService(
+        repo, tokens, api, cipher, sandbox=True, obligations_test_scenario="STATEFUL"
+    )
+    service.set_nino(landlord_id, "OE180677A")
+    service.discover_businesses(landlord_id, FRAUD)
+    service.obligations(landlord_id, FRAUD, *YEAR)
+    assert api.calls[-1]["test_scenario"] == "STATEFUL"
+
+
+def _period(start: str, end: str, due: str, status: str = "open") -> dict:
+    return {"periodStartDate": start, "periodEndDate": end, "dueDate": due, "status": status}
+
+
+def test_nothing_due_is_an_empty_list_not_an_error(service, api, landlord_id) -> None:
+    service.set_nino(landlord_id, "OE180677A")
+    service.discover_businesses(landlord_id, FRAUD)
+    api.fail_with = (404, {"code": "NO_OBLIGATIONS_FOUND", "message": "none"})
+    found, raw = service.obligations(landlord_id, FRAUD, *YEAR)
+    assert found == [] and raw["code"] == "NO_OBLIGATIONS_FOUND"
+
+
+def test_other_hmrc_errors_still_raise(service, api, landlord_id) -> None:
+    service.set_nino(landlord_id, "OE180677A")
+    service.discover_businesses(landlord_id, FRAUD)
+    api.fail_with = (403, {"code": "CLIENT_OR_AGENT_NOT_AUTHORISED", "message": "no"})
+    with pytest.raises(UpstreamError):
+        service.obligations(landlord_id, FRAUD, *YEAR)
+
+
+def test_production_ignores_other_businesses(service, api, landlord_id) -> None:
+    api.extra_groups = [
+        {
+            "typeOfBusiness": "self-employment",
+            "businessId": "XBIS12345678901",
+            "obligationDetails": [_period("2026-04-06", "2026-07-05", "2026-08-07")],
+        },
+        {
+            "typeOfBusiness": "uk-property",
+            "businessId": "XPIS00000000000",  # someone else's property business
+            "obligationDetails": [_period("2026-04-06", "2027-01-05", "2027-02-07")],
+        },
+    ]
+    service.set_nino(landlord_id, "OE180677A")
+    service.discover_businesses(landlord_id, FRAUD)
+    found, _ = service.obligations(landlord_id, FRAUD, *YEAR)
+    assert [o.period_end for o in found] == [date(2026, 7, 5), date(2026, 10, 5)]
+
+
+def test_sandbox_dynamic_mode_matches_what_hmrc_actually_returns(
+    repo, tokens, api, cipher, landlord_id
+) -> None:
+    """Shaped like the real sandbox reply: example businesses only, two tax years, repeats."""
+    api.obligation_details = []
+    api.extra_groups = [
+        {
+            "typeOfBusiness": "self-employment",
+            "businessId": "XBIS12345678901",
+            "obligationDetails": [_period("2026-04-06", "2027-01-05", "2027-02-07")],
+        },
+        {
+            "typeOfBusiness": "uk-property",
+            "businessId": "XPIS12345678901",  # not ours: the sandbox's example business
+            "obligationDetails": [
+                _period("2026-04-06", "2026-10-05", "2026-11-07"),
+                _period("2026-04-06", "2027-01-05", "2027-02-07"),
+                _period("2026-04-06", "2027-04-05", "2027-05-07"),
+                _period("2026-04-06", "2027-01-05", "2027-02-07"),  # repeated
+                _period("2027-04-06", "2027-07-05", "2027-08-07"),  # next tax year
+            ],
+        },
+    ]
+    service = HmrcTaxpayerService(
+        repo, tokens, api, cipher, sandbox=True, obligations_test_scenario="DYNAMIC"
+    )
+    service.set_nino(landlord_id, "OE180677A")
+    service.set_business(landlord_id, "XDIS36257256364")  # the business we created
+    found, _ = service.obligations(landlord_id, FRAUD, *YEAR)
+
+    assert [(o.period_end, o.due) for o in found] == [
+        (date(2026, 10, 5), date(2026, 11, 7)),
+        (date(2027, 1, 5), date(2027, 2, 7)),
+        (date(2027, 4, 5), date(2027, 5, 7)),
+    ]
+    call = api.calls[-1]
+    assert call["params"] == {}  # the sandbox rejects every filter in DYNAMIC mode
+    assert call["test_scenario"] == "DYNAMIC"

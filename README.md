@@ -64,6 +64,9 @@ the HTTP error mapping, and sign-in token verification).
 | HMRC endpoints and versions in one file | A path or version change at HMRC is a one-line fix |
 | HMRC errors passed on with HMRC's reference (502) | The landlord or support can quote it to HMRC |
 | Raw HMRC response returned alongside our parsed view | Our parsing can always be checked against HMRC's own words |
+| `Gov-Test-Scenario` only ever sent to the sandbox | The client drops it for production, whatever the caller asks |
+| "No obligations found" is an empty list, not an error | Nothing due is an answer; only real failures are errors |
+| Obligations re-checked for our business and dates | Defence in depth, and the sandbox can't filter in DYNAMIC mode |
 | Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
 | Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
@@ -132,6 +135,12 @@ API docs: http://127.0.0.1:8000/docs. Click **Authorize** and paste the token.
 3. Put `LEDGERLET_HMRC_CLIENT_ID`, `LEDGERLET_HMRC_CLIENT_SECRET` and `LEDGERLET_HMRC_TOKEN_KEY`
    in `.env` (see `.env.example`).
 4. `python scripts/hmrc_test_user.py` creates a sandbox individual to sign in to HMRC as.
+5. After connecting and saving the NINO, `python scripts/hmrc_create_property_business.py --sub <you>`
+   gives that individual a UK property business (needs Self Assessment Test Support (MTD) 1.0).
+   HMRC deletes sandbox test businesses after 7 days; re-run it when discovery stops finding one.
+6. Set `LEDGERLET_HMRC_OBLIGATIONS_TEST_SCENARIO=DYNAMIC`. The sandbox's obligations aren't linked
+   to businesses you create: it only generates them, unfiltered, for its own example businesses.
+   `scripts/hmrc_probe_obligations.py` shows what each request variant returns.
 
 ## Testing
 
