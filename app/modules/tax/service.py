@@ -89,13 +89,7 @@ class TaxService:
 
         property_summaries: list[PropertySummary] = []
         shared_totals: list[dict[TransactionCategory, int]] = []
-        for prop in self._properties.list_properties(landlord_id, include_archived=True):
-            transactions = self._transactions.list_transactions(
-                landlord_id, prop.id, date_from=period.start, date_to=period.end
-            )
-            if not transactions and prop.is_archived:
-                continue  # archived and nothing in this period: irrelevant
-            share = apply_share(totals_by_category(transactions), prop.ownership_percentage)
+        for prop, transactions, share in self._shares(landlord_id, period.start, period.end):
             shared_totals.append(share)
             property_summaries.append(
                 PropertySummary(
@@ -127,6 +121,29 @@ class TaxService:
             ],
             properties=property_summaries,
         )
+
+    def period_totals(
+        self, landlord_id: UUID, date_from: date, date_to: date
+    ) -> dict[TransactionCategory, int]:
+        """Totals per category in pence, at the landlord's share, across all properties.
+
+        The same figures the summary shows, so what's previewed is exactly what's sent.
+        """
+        return add_totals(*(s for _, _, s in self._shares(landlord_id, date_from, date_to)))
+
+    def _shares(
+        self, landlord_id: UUID, date_from: date, date_to: date
+    ) -> list[tuple[Property, list[Transaction], dict[TransactionCategory, int]]]:
+        rows = []
+        for prop in self._properties.list_properties(landlord_id, include_archived=True):
+            transactions = self._transactions.list_transactions(
+                landlord_id, prop.id, date_from=date_from, date_to=date_to
+            )
+            if not transactions and prop.is_archived:
+                continue  # archived and nothing in this period: irrelevant
+            share = apply_share(totals_by_category(transactions), prop.ownership_percentage)
+            rows.append((prop, transactions, share))
+        return rows
 
     def _resolve_year(self, tax_year: int | None) -> int:
         return tax_year if tax_year is not None else tax_year_containing(self._today())

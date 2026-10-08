@@ -15,6 +15,9 @@ PROPERTY_BUSINESS_VERSION = "6.0"
 
 LIST_BUSINESSES = "/individuals/business/details/{nino}/list"
 OBLIGATIONS = "/obligations/details/{nino}/income-and-expenditure"
+UK_PROPERTY_CUMULATIVE = (
+    "/individuals/business/property/uk/{nino}/{business_id}/cumulative/{tax_year}"
+)
 
 TIMEOUT_SECONDS = 20.0
 
@@ -45,6 +48,16 @@ class HmrcApi(Protocol):
         test_scenario: str | None = None,
     ) -> HmrcResponse: ...
 
+    def put(
+        self,
+        path: str,
+        version: str,
+        access_token: str,
+        fraud_headers: dict[str, str],
+        body: dict[str, Any],
+        test_scenario: str | None = None,
+    ) -> HmrcResponse: ...
+
 
 class HttpxHmrcApi:
     def __init__(self, base_url: str) -> None:
@@ -60,6 +73,34 @@ class HttpxHmrcApi:
         params: dict[str, str] | None = None,
         test_scenario: str | None = None,
     ) -> HmrcResponse:
+        return self._send(
+            "GET", path, version, access_token, fraud_headers, test_scenario, params=params
+        )
+
+    def put(
+        self,
+        path: str,
+        version: str,
+        access_token: str,
+        fraud_headers: dict[str, str],
+        body: dict[str, Any],
+        test_scenario: str | None = None,
+    ) -> HmrcResponse:
+        return self._send(
+            "PUT", path, version, access_token, fraud_headers, test_scenario, json=body
+        )
+
+    def _send(
+        self,
+        method: str,
+        path: str,
+        version: str,
+        access_token: str,
+        fraud_headers: dict[str, str],
+        test_scenario: str | None,
+        params: dict[str, str] | None = None,
+        json: dict[str, Any] | None = None,
+    ) -> HmrcResponse:
         headers = {
             **fraud_headers,
             "Authorization": f"Bearer {access_token}",
@@ -67,9 +108,11 @@ class HttpxHmrcApi:
         }
         if test_scenario and self._sandbox:  # never sent to production, whatever the caller asks
             headers["Gov-Test-Scenario"] = test_scenario
-        response = httpx.get(
-            f"{self._base}{path}", headers=headers, params=params, timeout=TIMEOUT_SECONDS
-        )
+        url = f"{self._base}{path}"
+        if method == "GET":
+            response = httpx.get(url, headers=headers, params=params, timeout=TIMEOUT_SECONDS)
+        else:
+            response = httpx.put(url, headers=headers, json=json, timeout=TIMEOUT_SECONDS)
         try:
             body = response.json() if response.content else {}
         except ValueError:

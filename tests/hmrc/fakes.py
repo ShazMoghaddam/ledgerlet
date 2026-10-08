@@ -126,6 +126,7 @@ class FakeHmrcApi:
         ]
         self.fail_with: tuple[int, dict] | None = None
         self.extra_groups: list[dict] = []  # other businesses' obligations HMRC may include
+        self.put_response: tuple[int, dict] = (204, {})
 
     def get(self, path, version, access_token, fraud_headers, params=None, test_scenario=None):
         self.calls.append(
@@ -157,6 +158,43 @@ class FakeHmrcApi:
             },
             "corr-2",
         )
+
+    def put(self, path, version, access_token, fraud_headers, body, test_scenario=None):
+        self.calls.append(
+            {
+                "method": "PUT",
+                "path": path,
+                "version": version,
+                "token": access_token,
+                "fraud_headers": dict(fraud_headers),
+                "body": body,
+                "test_scenario": test_scenario,
+            }
+        )
+        status, response_body = self.put_response
+        return self._make(status, response_body, "corr-put")
+
+
+class FakeSubmissionRepository:
+    def __init__(self) -> None:
+        self.items: list = []
+        self.commit_count = 0
+
+    def add(self, submission):
+        submission.id = submission.id or uuid4()
+        self.items.append(submission)
+        return submission
+
+    def list_for_landlord(self, landlord_id, tax_year=None):
+        found = [
+            x
+            for x in self.items
+            if x.landlord_id == landlord_id and (tax_year is None or x.tax_year == tax_year)
+        ]
+        return sorted(found, key=lambda x: x.submitted_at, reverse=True)
+
+    def commit(self) -> None:
+        self.commit_count += 1
 
 
 class FakeTokens:

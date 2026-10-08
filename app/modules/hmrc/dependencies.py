@@ -22,12 +22,18 @@ from app.modules.hmrc.fraud import (
     build_fraud_headers,
 )
 from app.modules.hmrc.oauth import HttpxOAuthClient, OAuthClient
-from app.modules.hmrc.repository import HmrcConnectionRepository, HmrcTaxpayerRepository
+from app.modules.hmrc.repository import (
+    HmrcConnectionRepository,
+    HmrcSubmissionRepository,
+    HmrcTaxpayerRepository,
+)
 from app.modules.hmrc.schemas import ClientDevice
 from app.modules.hmrc.service import HmrcConnectionService, OAuthSettings
+from app.modules.hmrc.submission import HmrcSubmissionService
 from app.modules.hmrc.taxpayer import HmrcTaxpayerService
 from app.modules.hmrc.validator import FraudHeaderValidator, HttpxFraudHeaderValidator
 from app.modules.landlords.dependencies import CurrentLandlordId
+from app.modules.tax.dependencies import TaxServiceDep
 
 _NOT_CONFIGURED = HTTPException(
     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -176,3 +182,19 @@ def get_taxpayer_service(
 
 
 TaxpayerServiceDep = Annotated[HmrcTaxpayerService, Depends(get_taxpayer_service)]
+
+
+
+def get_submission_service(
+    db: Annotated[Session, Depends(get_db)],
+    taxpayers: TaxpayerServiceDep,
+    connections: HmrcServiceDep,
+    tax: TaxServiceDep,
+    hmrc: Annotated[HmrcApi, Depends(get_hmrc_api)],
+) -> HmrcSubmissionService:
+    return HmrcSubmissionService(
+        HmrcSubmissionRepository(db), tax, taxpayers, connections, hmrc
+    )
+
+
+SubmissionServiceDep = Annotated[HmrcSubmissionService, Depends(get_submission_service)]

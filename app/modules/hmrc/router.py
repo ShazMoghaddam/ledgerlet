@@ -11,13 +11,14 @@ from fastapi import APIRouter, Cookie, HTTPException, Response, status
 from fastapi.responses import HTMLResponse
 
 from app.core.config import get_settings
-from app.core.time import utc_now
+from app.core.time import uk_today, utc_now
 from app.modules.hmrc.dependencies import (
     ClientDeviceDep,
     FraudHeadersDep,
     FraudValidatorDep,
     HmrcServiceDep,
     ServerContextDep,
+    SubmissionServiceDep,
     TaxpayerServiceDep,
     VendorInfoDep,
 )
@@ -33,11 +34,19 @@ from app.modules.hmrc.schemas import (
     HmrcObligationRead,
     HmrcObligationsRead,
     NinoIn,
+    SubmissionPreviewRead,
+    SubmissionRead,
+    SubmissionRequest,
     TaxpayerRead,
 )
 from app.modules.hmrc.service import STATE_MAX_AGE_SECONDS, HmrcConnectError
-from app.modules.landlords.dependencies import CurrentLandlordId
-from app.modules.tax.periods import PeriodBasis, tax_year_containing, update_period
+from app.modules.landlords.dependencies import CurrentLandlord, CurrentLandlordId
+from app.modules.tax.periods import (
+    PeriodBasis,
+    tax_year_containing,
+    tax_year_label,
+    update_period,
+)
 
 router = APIRouter(prefix="/hmrc", tags=["hmrc"])
 
@@ -161,6 +170,57 @@ def get_obligations(
         ],
         hmrc_response=raw,
     )
+
+
+@router.post("/submissions/preview", response_model=SubmissionPreviewRead)
+def preview_submission(
+    payload: SubmissionRequest, landlord: CurrentLandlord, service: SubmissionServiceDep
+):
+    """Exactly what would be sent to HMRC for this quarter. Sends nothing."""
+    year = _year(payload.tax_year)
+    p = service.preview(
+        landlord.id,
+        year,
+        payload.quarter,
+        payload.basis or landlord.period_basis,
+        payload.consolidated_expenses,
+    )
+    return SubmissionPreviewRead(
+        tax_year_label=tax_year_label(year),
+        quarter=p.period.quarter,
+        period_start=p.period.start,
+        period_end=p.period.end,
+        body=p.body,
+    )
+
+
+@router.post("/submissions", response_model=SubmissionRead, status_code=201)
+def submit_update(
+    payload: SubmissionRequest,
+    landlord: CurrentLandlord,
+    fraud_headers: FraudHeadersDep,
+    service: SubmissionServiceDep,
+):
+    """Send the cumulative quarterly update to HMRC. Every attempt is recorded."""
+    return service.submit(
+        landlord.id,
+        _year(payload.tax_year),
+        payload.quarter,
+        payload.basis or landlord.period_basis,
+        payload.consolidated_expenses,
+        fraud_headers,
+    )
+
+
+@router.get("/submissions", response_model=list[SubmissionRead])
+def list_submissions(
+    landlord_id: CurrentLandlordId, service: SubmissionServiceDep, tax_year: int | None = None
+):
+    return service.history(landlord_id, tax_year)
+
+
+def _year(tax_year: int | None) -> int:
+    return tax_year if tax_year is not None else tax_year_containing(uk_today())
 
 
 @router.get("/dev/device", response_class=HTMLResponse, include_in_schema=False)

@@ -192,6 +192,15 @@ class HmrcTaxpayerService:
                 found.setdefault((obligation.period_start, obligation.period_end), obligation)
         return sorted(found.values(), key=lambda o: o.period_end), response.body
 
+    def filing_identity(self, landlord_id: UUID) -> tuple[str, str]:
+        """(NINO, UK property business id), or 409 saying which is missing."""
+        taxpayer = self._require(landlord_id)
+        if not taxpayer.uk_property_business_id:
+            raise HmrcProfileMissingError(
+                "Choose your UK property business first (discover businesses)"
+            )
+        return self._nino(taxpayer), taxpayer.uk_property_business_id
+
     # Helpers
 
     def _require(self, landlord_id: UUID) -> HmrcTaxpayer:

@@ -7,6 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.modules.hmrc.nino import normalise_nino
+from app.modules.tax.periods import PeriodBasis
 
 
 class ConnectStartRead(BaseModel):
@@ -85,3 +86,38 @@ class HmrcObligationRead(BaseModel):
 class HmrcObligationsRead(BaseModel):
     obligations: list[HmrcObligationRead]
     hmrc_response: dict[str, Any]  # HMRC's own words, for checking against ours
+
+
+class SubmissionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    quarter: int = Field(ge=1, le=4, description="Cumulative from the start of the tax year")
+    tax_year: int | None = Field(default=None, ge=2020, le=2100, examples=[2026])
+    basis: PeriodBasis | None = None  # defaults to the landlord's saved setting
+    consolidated_expenses: bool = False
+
+
+class SubmissionPreviewRead(BaseModel):
+    tax_year_label: str
+    quarter: int
+    period_start: date
+    period_end: date
+    body: dict[str, Any]  # exactly what would be sent to HMRC
+
+
+class SubmissionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    business_id: str
+    tax_year: int
+    quarter: int
+    period_start: date
+    period_end: date
+    consolidated_expenses: bool
+    succeeded: bool
+    status_code: int
+    hmrc_correlation_id: str | None
+    submitted_at: datetime
+    request_body: dict[str, Any]
+    response_body: dict[str, Any]

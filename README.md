@@ -67,6 +67,14 @@ the HTTP error mapping, and sign-in token verification).
 | `Gov-Test-Scenario` only ever sent to the sandbox | The client drops it for production, whatever the caller asks |
 | "No obligations found" is an empty list, not an error | Nothing due is an answer; only real failures are errors |
 | Obligations re-checked for our business and dates | Defence in depth, and the sandbox can't filter in DYNAMIC mode |
+| Category to HMRC field mapping in one table | If HMRC renames a field, it's a one-line fix; a test proves every category has a home |
+| Preview uses the same totals as the tax summary | What the landlord sees is exactly what gets sent |
+| All fields sent, zeros included | Each cumulative update replaces the last, so a figure that falls to zero must say so |
+| Consolidated expenses refused at £90,000+ income | HMRC's threshold, enforced before anything is sent |
+| A quarter can only be submitted after it ends | Updates are cumulative to a quarter end |
+| No update may end earlier than one HMRC accepted | HMRC's rule; corrections go in a resubmission of the same or a later quarter |
+| Append-only audit trail, written before success or failure returns | Every filing can be traced: what was sent, when, HMRC's reply and reference |
+| Audit rows hold no NINO; landlord delete is RESTRICTed | Less sensitive data at rest, and filing history outlives everything else |
 | Money stored as integer pence | Exact sums, no rounding errors; Decimal pounds only at the API edge |
 | Categories mirror HMRC's MTD UK property headings | Quarterly submission is a straight sum per category |
 | Residential finance costs kept as their own category | HMRC requires mortgage interest reported separately (tax credit, not a deduction) |
@@ -173,8 +181,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
 5. HMRC MTD submission, sandbox first
    - 5a-i. Connect to HMRC: OAuth, encrypted tokens, refresh (done)
    - 5a-ii. Fraud prevention headers, validated by HMRC's test API (done)
-   - 5b-i. NINO, business discovery, obligations (read-only) (this phase)
-   - 5b-ii. Cumulative quarterly submission and audit trail
+   - 5b-i. NINO, business discovery, obligations (read-only) (done)
+   - 5b-ii. Cumulative quarterly submission and audit trail (this phase)
+   - Later: year-end final declaration (and year-end transaction locking), encryption key rotation
    - Later: Gov-Client-Multi-Factor (with the chosen identity provider), Gov-Vendor-License-IDs
 6. React + Vite frontend
 7. Open banking as a second transaction source
