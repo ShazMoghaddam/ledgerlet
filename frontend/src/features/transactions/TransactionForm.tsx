@@ -278,27 +278,29 @@ function TransactionForm({
         >
           <legend>Money in or out?</legend>
           {err("tx-kind-income")}
-          <label className={f.choice}>
-            <input
-              id="tx-kind-income"
-              type="radio"
-              name="kind"
-              value="income"
-              checked={values.kind === "income"}
-              onChange={() => set("kind", "income")}
-            />
-            Money in
-          </label>
-          <label className={f.choice}>
-            <input
-              type="radio"
-              name="kind"
-              value="expense"
-              checked={values.kind === "expense"}
-              onChange={() => set("kind", "expense")}
-            />
-            Money out
-          </label>
+          <div className={f.options}>
+            <label className={f.choice}>
+              <input
+                id="tx-kind-income"
+                type="radio"
+                name="kind"
+                value="income"
+                checked={values.kind === "income"}
+                onChange={() => set("kind", "income")}
+              />
+              Money in
+            </label>
+            <label className={f.choice}>
+              <input
+                type="radio"
+                name="kind"
+                value="expense"
+                checked={values.kind === "expense"}
+                onChange={() => set("kind", "expense")}
+              />
+              Money out
+            </label>
+          </div>
         </fieldset>
 
         {values.kind && (

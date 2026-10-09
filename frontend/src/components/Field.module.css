@@ -84,20 +84,32 @@ select.control {
   font-variant-numeric: tabular-nums;
 }
 
-/* Choices like "Money in / Money out". */
+/* Choices like "Money in / Money out": the question, any error, then the options in a row. */
 .choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
+.choices.hasError {
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-red); /* .choices removes the fieldset border */
+}
+
 .choices legend {
-  margin-bottom: var(--space-2);
+  float: left; /* lets the legend sit inside the grid like a label */
+  width: 100%;
   padding: 0;
   font-weight: 600;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
 .choice {
