@@ -111,10 +111,20 @@ it("previews, lets the landlord categorise, and imports exactly what they kept",
 
   // Two ticked rows have no category yet.
   await user.click(screen.getByRole("button", { name: "Import 3 transactions" }));
+  // The reason shows beside the button, and focus goes to the first row that needs one.
   expect(screen.getByRole("alert")).toHaveTextContent(
-    "Choose a category for 2 rows you’re importing",
+    "2 rows need a category. Choose one for each, or untick them.",
   );
+  expect(screen.getByLabelText(/Category for HOMESERVE PLC/)).toHaveFocus();
+  expect(screen.getAllByText("Choose a category", { selector: "span" })).toHaveLength(2);
   expect(sent.rows).toBeUndefined();
+
+  // Unticking a row takes it off the list of problems.
+  await user.click(box(/Import COUNCIL TAX REFUND/));
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "1 row needs a category. Choose one, or untick the row.",
+  );
+  await user.click(box(/Import COUNCIL TAX REFUND/));
 
   // Fill one in bulk (money out), the other by hand (money in).
   await user.selectOptions(

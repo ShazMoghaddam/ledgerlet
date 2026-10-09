@@ -242,6 +242,20 @@
   background: var(--color-paper);
 }
 
+.status {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.blocked {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.blocked:empty {
+  display: none;
+}
+
 @media (min-width: 768px) {
   .pair {
     grid-template-columns: 1fr 1fr;

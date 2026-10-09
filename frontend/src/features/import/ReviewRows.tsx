@@ -57,7 +57,9 @@ export function ReviewRows({
       ]),
     ),
   );
-  const [missing, setMissing] = useState<Set<number>>(new Set());
+  // Once Import has been pressed, every selected row without a category is flagged,
+  // and the flags clear as the landlord fills them in or unticks the row.
+  const [attempted, setAttempted] = useState(false);
   const [summary, setSummary] = useState<FieldError[]>([]);
 
   if (categories.isPending) return <Loading label="the categories" />;
@@ -67,21 +69,19 @@ export function ReviewRows({
   const choose = (line: number, change: Partial<Choice>) =>
     setChoices((c) => ({ ...c, [line]: { ...c[line]!, ...change } }));
   const selected = rows.filter((r) => importable(r) && choices[r.line]?.include);
+  const gaps = selected.filter((r) => !choices[r.line]?.category).map((r) => r.line);
+  const missing = new Set(attempted ? gaps : []);
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    const gaps = selected.filter((r) => !choices[r.line]?.category).map((r) => r.line);
-    setMissing(new Set(gaps));
+    setAttempted(true);
     if (gaps.length) {
-      setSummary([
-        {
-          field: `row-${gaps[0]}`,
-          message:
-            gaps.length === 1
-              ? "Choose a category for 1 row you’re importing"
-              : `Choose a category for ${gaps.length} rows you’re importing`,
-        },
-      ]);
+      // The button sits at the bottom of a long list, so take the landlord to the
+      // first row that needs a category (the reason is also next to the button).
+      const first = document.getElementById(`row-${gaps[0]}`);
+      first?.focus({ preventScroll: true });
+      first?.scrollIntoView?.({ block: "center" });
+      setSummary([]);
       return;
     }
     setSummary([]);
@@ -161,18 +161,23 @@ export function ReviewRows({
             choice={choices[r.line]!}
             categories={categories.data}
             missing={missing.has(r.line)}
-            onChange={(change) => {
-              choose(r.line, change);
-              if (change.category) setMissing((m) => new Set([...m].filter((x) => x !== r.line)));
-            }}
+            onChange={(change) => choose(r.line, change)}
           />
         ))}
       </ul>
 
       <div className={s.sticky}>
-        <span className="num" aria-live="polite">
-          {selected.length} of {rows.filter(importable).length} rows selected
-        </span>
+        <div className={s.status}>
+          <span className="num" aria-live="polite">
+            {selected.length} of {rows.filter(importable).length} rows selected
+          </span>
+          <p className={s.blocked} role="alert">
+            {missing.size > 0 &&
+              (missing.size === 1
+                ? "1 row needs a category. Choose one, or untick the row."
+                : `${missing.size} rows need a category. Choose one for each, or untick them.`)}
+          </p>
+        </div>
         <div className={s.actions}>
           <Button variant="quiet" onClick={onBack}>
             Start again
