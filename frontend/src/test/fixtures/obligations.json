@@ -1,0 +1,35 @@
+{
+  "tax_year": 2026,
+  "tax_year_label": "2026-27",
+  "basis": "standard",
+  "obligations": [
+    {
+      "quarter": 1,
+      "period_start": "2026-04-06",
+      "period_end": "2026-07-05",
+      "deadline": "2026-08-07",
+      "status": "past_deadline"
+    },
+    {
+      "quarter": 2,
+      "period_start": "2026-04-06",
+      "period_end": "2026-10-05",
+      "deadline": "2026-11-07",
+      "status": "due"
+    },
+    {
+      "quarter": 3,
+      "period_start": "2026-04-06",
+      "period_end": "2027-01-05",
+      "deadline": "2027-02-07",
+      "status": "open"
+    },
+    {
+      "quarter": 4,
+      "period_start": "2026-04-06",
+      "period_end": "2027-04-05",
+      "deadline": "2027-05-07",
+      "status": "open"
+    }
+  ]
+}

@@ -1,0 +1,3587 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LedgerLet",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Get Me",
+        "operationId": "get_me_api_v1_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandlordRead"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Update Me",
+        "operationId": "update_me_api_v1_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LandlordUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LandlordRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/properties": {
+      "post": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Create Property",
+        "operationId": "create_property_api_v1_properties_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropertyCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "List Properties",
+        "operationId": "list_properties_api_v1_properties_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Archived"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PropertyRead"
+                  },
+                  "title": "Response List Properties Api V1 Properties Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}": {
+      "get": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Get Property",
+        "operationId": "get_property_api_v1_properties__property_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Update Property",
+        "operationId": "update_property_api_v1_properties__property_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropertyUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}/archive": {
+      "post": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Archive Property",
+        "operationId": "archive_property_api_v1_properties__property_id__archive_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}/restore": {
+      "post": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Restore Property",
+        "operationId": "restore_property_api_v1_properties__property_id__restore_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/categories": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "List Categories",
+        "operationId": "list_categories_api_v1_transactions_categories_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryRead"
+                  },
+                  "type": "array",
+                  "title": "Response List Categories Api V1 Transactions Categories Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}/transactions": {
+      "post": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Record Transaction",
+        "operationId": "record_transaction_api_v1_properties__property_id__transactions_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "List Transactions",
+        "operationId": "list_transactions_api_v1_properties__property_id__transactions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TransactionCategory"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionRead"
+                  },
+                  "title": "Response List Transactions Api V1 Properties  Property Id  Transactions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Search Transactions",
+        "description": "All of the landlord's transactions across properties, newest first, one page at a time.",
+        "operationId": "search_transactions_api_v1_transactions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Property Id"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TransactionCategory"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Description or amount",
+              "title": "Q"
+            },
+            "description": "Description or amount"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/{transaction_id}": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Get Transaction",
+        "operationId": "get_transaction_api_v1_transactions__transaction_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Update Transaction",
+        "operationId": "update_transaction_api_v1_transactions__transaction_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Delete Transaction",
+        "operationId": "delete_transaction_api_v1_transactions__transaction_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Transaction Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}/imports/preview": {
+      "post": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Preview Import",
+        "operationId": "preview_import_api_v1_properties__property_id__imports_preview_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_preview_import_api_v1_properties__property_id__imports_preview_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportPreview"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/{property_id}/imports/confirm": {
+      "post": {
+        "tags": [
+          "imports"
+        ],
+        "summary": "Confirm Import",
+        "operationId": "confirm_import_api_v1_properties__property_id__imports_confirm_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tax/obligations": {
+      "get": {
+        "tags": [
+          "tax"
+        ],
+        "summary": "Get Obligations",
+        "operationId": "get_obligations_api_v1_tax_obligations_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tax_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2100,
+                  "minimum": 2020
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start year, e.g. 2026 for 2026-27. Defaults to now.",
+              "title": "Tax Year"
+            },
+            "description": "Start year, e.g. 2026 for 2026-27. Defaults to now."
+          },
+          {
+            "name": "basis",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PeriodBasis"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "standard or calendar. Defaults to your saved setting (see /me).",
+              "title": "Basis"
+            },
+            "description": "standard or calendar. Defaults to your saved setting (see /me)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObligationsRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tax/summary": {
+      "get": {
+        "tags": [
+          "tax"
+        ],
+        "summary": "Get Summary",
+        "operationId": "get_summary_api_v1_tax_summary_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 4,
+              "minimum": 1,
+              "description": "Cumulative from the year start",
+              "title": "Quarter"
+            },
+            "description": "Cumulative from the year start"
+          },
+          {
+            "name": "tax_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2100,
+                  "minimum": 2020
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start year, e.g. 2026 for 2026-27. Defaults to now.",
+              "title": "Tax Year"
+            },
+            "description": "Start year, e.g. 2026 for 2026-27. Defaults to now."
+          },
+          {
+            "name": "basis",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/PeriodBasis"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "standard or calendar. Defaults to your saved setting (see /me).",
+              "title": "Basis"
+            },
+            "description": "standard or calendar. Defaults to your saved setting (see /me)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hmrc/connect": {
+      "post": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Start Connect",
+        "operationId": "start_connect_api_v1_hmrc_connect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ConnectStartIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectStartRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hmrc/callback": {
+      "get": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Callback",
+        "operationId": "callback_api_v1_hmrc_callback_get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error"
+            }
+          },
+          {
+            "name": "ledgerlet_hmrc_connect",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ledgerlet Hmrc Connect"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hmrc/connection": {
+      "get": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Get Connection",
+        "operationId": "get_connection_api_v1_hmrc_connection_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionStatus"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Disconnect",
+        "operationId": "disconnect_api_v1_hmrc_connection_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hmrc/fraud-headers/validate": {
+      "post": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Validate Fraud Headers",
+        "description": "Build this request's fraud prevention headers and ask HMRC's sandbox to check them.",
+        "operationId": "validate_fraud_headers_api_v1_hmrc_fraud_headers_validate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-ledgerlet-device",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Ledgerlet-Device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FraudHeaderCheck"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hmrc/taxpayer": {
+      "get": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Get Taxpayer",
+        "operationId": "get_taxpayer_api_v1_hmrc_taxpayer_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxpayerRead"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Set Nino",
+        "operationId": "set_nino_api_v1_hmrc_taxpayer_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NinoIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxpayerRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hmrc/taxpayer/business": {
+      "put": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Set Business",
+        "operationId": "set_business_api_v1_hmrc_taxpayer_business_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessIdIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxpayerRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hmrc/businesses/discover": {
+      "post": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Discover Businesses",
+        "description": "Ask HMRC which businesses this landlord has; auto-select a single UK property one.",
+        "operationId": "discover_businesses_api_v1_hmrc_businesses_discover_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-ledgerlet-device",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Ledgerlet-Device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hmrc/obligations": {
+      "get": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Get Obligations",
+        "description": "HMRC's own list of quarterly updates due for this landlord's UK property business.",
+        "operationId": "get_obligations_api_v1_hmrc_obligations_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tax_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tax Year"
+            }
+          },
+          {
+            "name": "x-ledgerlet-device",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Ledgerlet-Device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HmrcObligationsRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hmrc/submissions/preview": {
+      "post": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Preview Submission",
+        "description": "Exactly what would be sent to HMRC for this quarter. Sends nothing.",
+        "operationId": "preview_submission_api_v1_hmrc_submissions_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionPreviewRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/hmrc/submissions": {
+      "post": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Submit Update",
+        "description": "Send the cumulative quarterly update to HMRC. Every attempt is recorded.",
+        "operationId": "submit_update_api_v1_hmrc_submissions_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-ledgerlet-device",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Ledgerlet-Device"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "List Submissions",
+        "operationId": "list_submissions_api_v1_hmrc_submissions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tax_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tax Year"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubmissionRead"
+                  },
+                  "title": "Response List Submissions Api V1 Hmrc Submissions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_preview_import_api_v1_properties__property_id__imports_preview_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          },
+          "date_column": {
+            "type": "string",
+            "title": "Date Column"
+          },
+          "description_column": {
+            "type": "string",
+            "title": "Description Column"
+          },
+          "amount_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Column"
+          },
+          "paid_in_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid In Column"
+          },
+          "paid_out_column": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid Out Column"
+          },
+          "date_format": {
+            "type": "string",
+            "title": "Date Format",
+            "default": "%d/%m/%Y"
+          },
+          "invert_sign": {
+            "type": "boolean",
+            "title": "Invert Sign",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "date_column",
+          "description_column"
+        ],
+        "title": "Body_preview_import_api_v1_properties__property_id__imports_preview_post"
+      },
+      "BusinessIdIn": {
+        "properties": {
+          "business_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{6,32}$",
+            "title": "Business Id",
+            "examples": [
+              "XPIS12345678901"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_id"
+        ],
+        "title": "BusinessIdIn"
+      },
+      "BusinessRead": {
+        "properties": {
+          "business_id": {
+            "type": "string",
+            "title": "Business Id"
+          },
+          "type_of_business": {
+            "type": "string",
+            "title": "Type Of Business"
+          },
+          "trading_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trading Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "business_id",
+          "type_of_business",
+          "trading_name"
+        ],
+        "title": "BusinessRead"
+      },
+      "CategoryAmount": {
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/TransactionCategory"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TransactionKind"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "label",
+          "kind",
+          "amount"
+        ],
+        "title": "CategoryAmount"
+      },
+      "CategoryRead": {
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/TransactionCategory"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TransactionKind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "label",
+          "kind"
+        ],
+        "title": "CategoryRead"
+      },
+      "ConnectStartIn": {
+        "properties": {
+          "return_to": {
+            "type": "string",
+            "maxLength": 200,
+            "pattern": "^/([A-Za-z0-9_.~?=&%-][A-Za-z0-9/_.~?=&%-]*)?$",
+            "title": "Return To",
+            "default": "/settings/hmrc"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ConnectStartIn",
+        "description": "Where to send the landlord back to in the app once HMRC is done.\n\nOnly a path inside our own app is accepted (\"/tax/2026/q2\", never\n\"https://...\" or \"//evil.example\"), so the callback can't be used to\nbounce people to another site."
+      },
+      "ConnectStartRead": {
+        "properties": {
+          "authorize_url": {
+            "type": "string",
+            "title": "Authorize Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "authorize_url"
+        ],
+        "title": "ConnectStartRead"
+      },
+      "ConnectionStatus": {
+        "properties": {
+          "connected": {
+            "type": "boolean",
+            "title": "Connected"
+          },
+          "connected_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Connected At"
+          },
+          "access_token_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Token Expires At"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connected"
+        ],
+        "title": "ConnectionStatus"
+      },
+      "Direction": {
+        "type": "string",
+        "enum": [
+          "in",
+          "out"
+        ],
+        "title": "Direction"
+      },
+      "DiscoveryRead": {
+        "properties": {
+          "businesses": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessRead"
+            },
+            "type": "array",
+            "title": "Businesses"
+          },
+          "selected_business_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Business Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "businesses",
+          "selected_business_id"
+        ],
+        "title": "DiscoveryRead"
+      },
+      "FraudHeaderCheck": {
+        "properties": {
+          "headers_sent": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers Sent"
+          },
+          "hmrc_response": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Hmrc Response"
+          }
+        },
+        "type": "object",
+        "required": [
+          "headers_sent",
+          "hmrc_response"
+        ],
+        "title": "FraudHeaderCheck"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HmrcObligationRead": {
+        "properties": {
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "due": {
+            "type": "string",
+            "format": "date",
+            "title": "Due"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "received": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period_start",
+          "period_end",
+          "due",
+          "status",
+          "received"
+        ],
+        "title": "HmrcObligationRead"
+      },
+      "HmrcObligationsRead": {
+        "properties": {
+          "obligations": {
+            "items": {
+              "$ref": "#/components/schemas/HmrcObligationRead"
+            },
+            "type": "array",
+            "title": "Obligations"
+          },
+          "hmrc_response": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Hmrc Response"
+          }
+        },
+        "type": "object",
+        "required": [
+          "obligations",
+          "hmrc_response"
+        ],
+        "title": "HmrcObligationsRead"
+      },
+      "ImportConfirmRequest": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ImportRowConfirm"
+            },
+            "type": "array",
+            "maxItems": 5000,
+            "minItems": 1,
+            "title": "Rows"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rows"
+        ],
+        "title": "ImportConfirmRequest"
+      },
+      "ImportPreview": {
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Property Id"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "new": {
+            "type": "integer",
+            "title": "New"
+          },
+          "already_imported": {
+            "type": "integer",
+            "title": "Already Imported"
+          },
+          "possible_duplicates": {
+            "type": "integer",
+            "title": "Possible Duplicates"
+          },
+          "invalid": {
+            "type": "integer",
+            "title": "Invalid"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "property_id",
+          "total",
+          "new",
+          "already_imported",
+          "possible_duplicates",
+          "invalid",
+          "rows"
+        ],
+        "title": "ImportPreview"
+      },
+      "ImportResult": {
+        "properties": {
+          "created": {
+            "type": "integer",
+            "title": "Created"
+          },
+          "skipped_already_imported": {
+            "type": "integer",
+            "title": "Skipped Already Imported"
+          },
+          "transaction_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Transaction Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created",
+          "skipped_already_imported",
+          "transaction_ids"
+        ],
+        "title": "ImportResult"
+      },
+      "ImportRowConfirm": {
+        "properties": {
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Fingerprint"
+          },
+          "transaction_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Transaction Date"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Amount"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TransactionCategory"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "fingerprint",
+          "transaction_date",
+          "description",
+          "amount",
+          "direction",
+          "category"
+        ],
+        "title": "ImportRowConfirm"
+      },
+      "LandlordRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "period_basis": {
+            "$ref": "#/components/schemas/PeriodBasis"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "display_name",
+          "period_basis",
+          "created_at"
+        ],
+        "title": "LandlordRead"
+      },
+      "LandlordUpdate": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "period_basis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PeriodBasis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LandlordUpdate"
+      },
+      "NinoIn": {
+        "properties": {
+          "nino": {
+            "type": "string",
+            "title": "Nino",
+            "examples": [
+              "QQ123456C"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "nino"
+        ],
+        "title": "NinoIn"
+      },
+      "ObligationRead": {
+        "properties": {
+          "quarter": {
+            "type": "integer",
+            "title": "Quarter"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date",
+            "title": "Deadline"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ObligationStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quarter",
+          "period_start",
+          "period_end",
+          "deadline",
+          "status"
+        ],
+        "title": "ObligationRead"
+      },
+      "ObligationStatus": {
+        "type": "string",
+        "enum": [
+          "not_started",
+          "open",
+          "due",
+          "past_deadline"
+        ],
+        "title": "ObligationStatus"
+      },
+      "ObligationsRead": {
+        "properties": {
+          "tax_year": {
+            "type": "integer",
+            "title": "Tax Year"
+          },
+          "tax_year_label": {
+            "type": "string",
+            "title": "Tax Year Label"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/PeriodBasis"
+          },
+          "obligations": {
+            "items": {
+              "$ref": "#/components/schemas/ObligationRead"
+            },
+            "type": "array",
+            "title": "Obligations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tax_year",
+          "tax_year_label",
+          "basis",
+          "obligations"
+        ],
+        "title": "ObligationsRead"
+      },
+      "PeriodBasis": {
+        "type": "string",
+        "enum": [
+          "standard",
+          "calendar"
+        ],
+        "title": "PeriodBasis"
+      },
+      "PreviewRow": {
+        "properties": {
+          "line": {
+            "type": "integer",
+            "title": "Line"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RowStatus"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "transaction_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction Date"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Direction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "suggested_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TransactionKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fingerprint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fingerprint"
+          }
+        },
+        "type": "object",
+        "required": [
+          "line",
+          "status",
+          "message",
+          "transaction_date",
+          "description",
+          "amount",
+          "direction",
+          "suggested_kind",
+          "fingerprint"
+        ],
+        "title": "PreviewRow"
+      },
+      "PropertyCreate": {
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Nickname",
+            "examples": [
+              "Flat 2, Elm Court"
+            ]
+          },
+          "address_line_1": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Address Line 1"
+          },
+          "address_line_2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line 2"
+          },
+          "town": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Town"
+          },
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "examples": [
+              "SW1A 1AA"
+            ]
+          },
+          "ownership_percentage": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Ownership Percentage",
+            "description": "Your tax share of this property's income and expenses, in percent",
+            "default": "100.00"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nickname",
+          "address_line_1",
+          "town",
+          "postcode"
+        ],
+        "title": "PropertyCreate"
+      },
+      "PropertyRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "address_line_1": {
+            "type": "string",
+            "title": "Address Line 1"
+          },
+          "address_line_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line 2"
+          },
+          "town": {
+            "type": "string",
+            "title": "Town"
+          },
+          "postcode": {
+            "type": "string",
+            "title": "Postcode"
+          },
+          "ownership_percentage": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Ownership Percentage"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nickname",
+          "address_line_1",
+          "address_line_2",
+          "town",
+          "postcode",
+          "ownership_percentage",
+          "is_archived",
+          "archived_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "PropertyRead"
+      },
+      "PropertySummary": {
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Property Id"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "ownership_percentage": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Ownership Percentage"
+          },
+          "is_archived": {
+            "type": "boolean",
+            "title": "Is Archived"
+          },
+          "transaction_count": {
+            "type": "integer",
+            "title": "Transaction Count"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/Totals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "property_id",
+          "nickname",
+          "ownership_percentage",
+          "is_archived",
+          "transaction_count",
+          "totals"
+        ],
+        "title": "PropertySummary"
+      },
+      "PropertyUpdate": {
+        "properties": {
+          "nickname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nickname"
+          },
+          "address_line_1": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line 1"
+          },
+          "address_line_2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line 2"
+          },
+          "town": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Town"
+          },
+          "postcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postcode"
+          },
+          "ownership_percentage": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ownership Percentage",
+            "description": "Your tax share of this property's income and expenses, in percent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PropertyUpdate",
+        "description": "Partial update (PATCH): send only the fields you want to change."
+      },
+      "RowStatus": {
+        "type": "string",
+        "enum": [
+          "new",
+          "already_imported",
+          "possible_duplicate",
+          "invalid"
+        ],
+        "title": "RowStatus"
+      },
+      "SubmissionPreviewRead": {
+        "properties": {
+          "tax_year_label": {
+            "type": "string",
+            "title": "Tax Year Label"
+          },
+          "quarter": {
+            "type": "integer",
+            "title": "Quarter"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "body": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tax_year_label",
+          "quarter",
+          "period_start",
+          "period_end",
+          "body"
+        ],
+        "title": "SubmissionPreviewRead"
+      },
+      "SubmissionRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "business_id": {
+            "type": "string",
+            "title": "Business Id"
+          },
+          "tax_year": {
+            "type": "integer",
+            "title": "Tax Year"
+          },
+          "quarter": {
+            "type": "integer",
+            "title": "Quarter"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "consolidated_expenses": {
+            "type": "boolean",
+            "title": "Consolidated Expenses"
+          },
+          "succeeded": {
+            "type": "boolean",
+            "title": "Succeeded"
+          },
+          "status_code": {
+            "type": "integer",
+            "title": "Status Code"
+          },
+          "hmrc_correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hmrc Correlation Id"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "request_body": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Request Body"
+          },
+          "response_body": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Response Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "business_id",
+          "tax_year",
+          "quarter",
+          "period_start",
+          "period_end",
+          "consolidated_expenses",
+          "succeeded",
+          "status_code",
+          "hmrc_correlation_id",
+          "submitted_at",
+          "request_body",
+          "response_body"
+        ],
+        "title": "SubmissionRead"
+      },
+      "SubmissionRequest": {
+        "properties": {
+          "quarter": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Quarter",
+            "description": "Cumulative from the start of the tax year"
+          },
+          "tax_year": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 2100.0,
+                "minimum": 2020.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Year",
+            "examples": [
+              2026
+            ]
+          },
+          "basis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PeriodBasis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "consolidated_expenses": {
+            "type": "boolean",
+            "title": "Consolidated Expenses",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "quarter"
+        ],
+        "title": "SubmissionRequest"
+      },
+      "TaxSummary": {
+        "properties": {
+          "tax_year": {
+            "type": "integer",
+            "title": "Tax Year"
+          },
+          "tax_year_label": {
+            "type": "string",
+            "title": "Tax Year Label"
+          },
+          "quarter": {
+            "type": "integer",
+            "title": "Quarter"
+          },
+          "basis": {
+            "$ref": "#/components/schemas/PeriodBasis"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date",
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date",
+            "title": "Deadline"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ObligationStatus"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/Totals"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryAmount"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/PropertySummary"
+            },
+            "type": "array",
+            "title": "Properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tax_year",
+          "tax_year_label",
+          "quarter",
+          "basis",
+          "period_start",
+          "period_end",
+          "deadline",
+          "status",
+          "totals",
+          "categories",
+          "properties"
+        ],
+        "title": "TaxSummary",
+        "description": "Year-to-date figures for one cumulative update period, at the owner's share."
+      },
+      "TaxpayerRead": {
+        "properties": {
+          "nino": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nino"
+          },
+          "uk_property_business_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uk Property Business Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nino",
+          "uk_property_business_id"
+        ],
+        "title": "TaxpayerRead"
+      },
+      "Totals": {
+        "properties": {
+          "income": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Income"
+          },
+          "expenses": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Expenses"
+          },
+          "residential_finance_costs": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Residential Finance Costs"
+          },
+          "profit": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Profit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "income",
+          "expenses",
+          "residential_finance_costs",
+          "profit"
+        ],
+        "title": "Totals"
+      },
+      "TransactionCategory": {
+        "type": "string",
+        "enum": [
+          "rental_income",
+          "lease_premium",
+          "reverse_premium",
+          "other_income",
+          "premises_running_costs",
+          "repairs_and_maintenance",
+          "non_residential_finance_costs",
+          "professional_fees",
+          "cost_of_services",
+          "travel_costs",
+          "other_expenses",
+          "residential_finance_costs"
+        ],
+        "title": "TransactionCategory"
+      },
+      "TransactionCreate": {
+        "properties": {
+          "transaction_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Transaction Date"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TransactionCategory"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Description",
+            "examples": [
+              "October rent"
+            ]
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Amount",
+            "examples": [
+              "850.00"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "transaction_date",
+          "category",
+          "description",
+          "amount"
+        ],
+        "title": "TransactionCreate"
+      },
+      "TransactionKind": {
+        "type": "string",
+        "enum": [
+          "income",
+          "expense"
+        ],
+        "title": "TransactionKind"
+      },
+      "TransactionListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "property_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Property Id"
+          },
+          "transaction_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Transaction Date"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TransactionCategory"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TransactionKind"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Amount"
+          },
+          "source": {
+            "$ref": "#/components/schemas/TransactionSource"
+          },
+          "is_locked": {
+            "type": "boolean",
+            "title": "Is Locked"
+          },
+          "locked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "share_amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Share Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "property_id",
+          "transaction_date",
+          "category",
+          "kind",
+          "description",
+          "amount",
+          "source",
+          "is_locked",
+          "locked_at",
+          "created_at",
+          "updated_at",
+          "share_amount"
+        ],
+        "title": "TransactionListItem",
+        "description": "A row in the cross-property list, with the landlord's share already worked out.\n\nshare_amount is for display. Tax totals are never built by adding these up:\nthey apply the share per property per category, as the tax module does."
+      },
+      "TransactionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionListItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "money_in": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Money In"
+          },
+          "money_out": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Money Out"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "money_in",
+          "money_out"
+        ],
+        "title": "TransactionPage",
+        "description": "One page of transactions, plus totals for everything that matches (not just this page).\n\nmoney_in and money_out are at the landlord's share. money_out includes\nmortgage interest, because it is money paid out, even though HMRC treats\nit separately from expenses."
+      },
+      "TransactionRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "property_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Property Id"
+          },
+          "transaction_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Transaction Date"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TransactionCategory"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TransactionKind"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Amount"
+          },
+          "source": {
+            "$ref": "#/components/schemas/TransactionSource"
+          },
+          "is_locked": {
+            "type": "boolean",
+            "title": "Is Locked"
+          },
+          "locked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locked At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "property_id",
+          "transaction_date",
+          "category",
+          "kind",
+          "description",
+          "amount",
+          "source",
+          "is_locked",
+          "locked_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TransactionRead"
+      },
+      "TransactionSource": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "csv_import",
+          "open_banking"
+        ],
+        "title": "TransactionSource",
+        "description": "Where a transaction came from. Each source is a separate way in."
+      },
+      "TransactionUpdate": {
+        "properties": {
+          "transaction_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction Date"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TransactionCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "TransactionUpdate",
+        "description": "Partial update (PATCH). The property a transaction belongs to can't be changed."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

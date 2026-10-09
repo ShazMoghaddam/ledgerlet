@@ -147,6 +147,54 @@ Sample data (two properties and 29 transactions, the figures the designs use):
 python scripts/seed_demo.py --sub alice
 ```
 
+## Web app (local development)
+
+Needs Node 20.19 or newer (`brew install node`). Run the API as above, then in a second tab:
+
+```bash
+cd frontend
+npm install          # once
+npm run dev          # http://localhost:5173
+```
+
+Sign in by pasting a token from `python scripts/dev_auth.py token --sub alice`. The dev server
+forwards `/api` to the API on port 8000, so the browser sees one site, as it will in production.
+
+```bash
+npm test             # unit and component tests (fast, no browser)
+npx playwright install chromium   # once
+npm run test:e2e     # the built app in Chromium at phone, tablet and laptop sizes, with axe
+npm run lint && npm run typecheck && npm run format:check
+```
+
+If you change the API, regenerate what the frontend is built against, then commit it:
+
+```bash
+python -m scripts.export_frontend_contract   # openapi.json and test fixtures
+cd frontend && npm run api:types              # TypeScript types from openapi.json
+```
+
+### Frontend decisions
+
+| Decision | Why |
+|---|---|
+| React + TypeScript, built with Vite; no Next.js | FastAPI is already the server and a signed-in app needs no server rendering |
+| Pinned to the previous major versions (React Router 7, Vite 7, TypeScript 5.9) | Mature and well documented; upgrades get their own PR |
+| Types generated from the API's OpenAPI description | A backend change the frontend doesn't handle fails the type check, not the browser |
+| Test fixtures exported from the real API with the sample data | Tests see exactly what the app will see; CI fails if they drift |
+| TanStack Query for everything from the server; no global store | Server data is the app's state; caching and refetching come for free |
+| Money handled as whole pence parsed from strings | No floating point anywhere near an amount; `parseFloat` is banned by lint |
+| Dates as calendar days in UTC; "today" is today in the UK | A day never shifts with the device's time zone; tax rules use UK dates |
+| Hand-built components, CSS modules and design tokens | The look is LedgerLet's own, not a component library's |
+| React Aria for complex widgets (from the next phase) | Accessible date and number fields that would be hard to get right by hand |
+| One navigation, three layouts: tab bar, rail, sidebar | Each screen size gets a fitting pattern; one set of links to maintain |
+| Some components render different structures by width (table vs list) | A phone gets a signed list, not a squeezed table |
+| Quarter state worked out from deadlines plus HMRC history | Updates are cumulative, so a later accepted update also covers earlier quarters |
+| Focus moves to the new page's heading after navigating | Screen reader users hear the page change; Tab starts at the top |
+| Sign-in token in sessionStorage, behind one small module | Gone when the tab closes; swapping in the identity provider touches one file |
+| Signing out clears every cached response | The next person on the device sees nothing of the last |
+| Browser tests at 390, 834 and 1440 px with axe | Responsive layout, tap targets and accessibility are checked, not assumed |
+
 ## HMRC sandbox (local development)
 
 1. Register at the HMRC Developer Hub, create a sandbox application, and subscribe it to
@@ -179,8 +227,10 @@ created. If your volume already existed, create it once with:
 
 ## Phase gate
 
-A phase is done when all four commands above pass, on SQLite **and** Postgres.
-GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
+A phase is done when all four commands above pass, on SQLite **and** Postgres, and the
+frontend's checks pass. GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every
+push: the backend job, and a frontend job (generated types current, lint, formatting, types,
+unit tests, build, browser tests).
 
 ## Roadmap
 
@@ -199,7 +249,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
    - Later: year-end final declaration (and year-end transaction locking), encryption key rotation
    - Later: Gov-Client-Multi-Factor (with the chosen identity provider), Gov-Vendor-License-IDs
 6. React + Vite frontend
-   - 6a. API for the frontend: cross-property transactions, HMRC return to the app, sample data (this phase)
-   - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview
+   - 6a. API for the frontend: cross-property transactions, HMRC return to the app, sample data (done)
+   - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview (this phase)
    - 6c. Transactions, Tax and the HMRC submit flow
 7. Open banking as a second transaction source

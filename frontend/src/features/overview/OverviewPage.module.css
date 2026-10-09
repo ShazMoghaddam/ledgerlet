@@ -1,0 +1,246 @@
+.page {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.main {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* Next step: the page's one primary action. */
+.next {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.next h1 {
+  font-size: var(--text-title);
+  text-wrap: balance;
+}
+
+.next p {
+  max-width: 36rem;
+  text-wrap: pretty;
+  color: var(--color-slate);
+  font-size: var(--text-lead);
+}
+
+.nextText {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.overdue {
+  color: var(--color-amber);
+}
+
+.columns {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.section {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.section h2 {
+  font-size: var(--text-section);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.sectionHead a {
+  font-weight: 600;
+  font-size: var(--text-small);
+}
+
+/* Year to date: a short statement, ruled like a bank statement. Each line is one row,
+   so the rule above it is one unbroken line whatever the type sizes. */
+.statement > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.statement dd {
+  margin: 0;
+  text-align: right;
+}
+
+.statement > .total {
+  border-top: 2px solid var(--color-rule-strong);
+  font-weight: 600;
+}
+
+.total dd {
+  font-size: var(--text-key-figure);
+  letter-spacing: -0.01em;
+}
+
+.note {
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+}
+
+/* Recent transactions */
+.table {
+  font-size: var(--text-small);
+}
+
+.table th {
+  padding: 0 0 var(--space-2);
+  border-bottom: 1.5px solid var(--color-rule-strong);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-align: left;
+}
+
+.table td {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  vertical-align: top;
+}
+
+.table .money {
+  width: 6.5rem;
+  text-align: right;
+}
+
+.date {
+  width: 4.5rem;
+  color: var(--color-slate);
+}
+
+.meta {
+  color: var(--color-slate);
+}
+
+.table .meta {
+  display: block;
+  font-size: var(--text-caption);
+}
+
+.list {
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid var(--color-rule-strong);
+}
+
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.list .meta {
+  display: block;
+  font-size: var(--text-caption);
+}
+
+.list .amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Context: HMRC and properties. A column on laptops, after the rest below that. */
+.aside {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  font-size: var(--text-small);
+}
+
+.aside h2 {
+  font-size: 1.1875rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+}
+
+.facts dt {
+  color: var(--color-slate);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.properties {
+  padding: 0;
+  list-style: none;
+}
+
+.properties li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.properties li:last-child {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.strongLink {
+  font-weight: 600;
+}
+
+/* Tablet: one column, so keep the statement narrow enough to read across. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .ytd {
+    max-width: 32rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .next {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-6);
+  }
+
+  .aside {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+@media (min-width: 1200px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr) 17.5rem;
+    gap: var(--space-7);
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  .aside {
+    grid-template-columns: 1fr;
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--color-rule);
+  }
+}

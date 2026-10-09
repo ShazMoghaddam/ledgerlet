@@ -1,0 +1,62 @@
+[
+  {
+    "value": "rental_income",
+    "label": "Rental income",
+    "kind": "income"
+  },
+  {
+    "value": "lease_premium",
+    "label": "Premiums for the grant of a lease",
+    "kind": "income"
+  },
+  {
+    "value": "reverse_premium",
+    "label": "Reverse premiums and inducements",
+    "kind": "income"
+  },
+  {
+    "value": "other_income",
+    "label": "Other property income",
+    "kind": "income"
+  },
+  {
+    "value": "premises_running_costs",
+    "label": "Rent, rates, insurance and ground rent",
+    "kind": "expense"
+  },
+  {
+    "value": "repairs_and_maintenance",
+    "label": "Repairs and maintenance",
+    "kind": "expense"
+  },
+  {
+    "value": "non_residential_finance_costs",
+    "label": "Non-residential property finance costs",
+    "kind": "expense"
+  },
+  {
+    "value": "professional_fees",
+    "label": "Legal, management and other professional fees",
+    "kind": "expense"
+  },
+  {
+    "value": "cost_of_services",
+    "label": "Cost of services provided, including wages",
+    "kind": "expense"
+  },
+  {
+    "value": "travel_costs",
+    "label": "Travel costs",
+    "kind": "expense"
+  },
+  {
+    "value": "other_expenses",
+    "label": "Other allowable property expenses",
+    "kind": "expense"
+  },
+  {
+    "value": "residential_finance_costs",
+    "label": "Residential property finance costs",
+    "kind": "expense"
+  }
+]
