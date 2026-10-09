@@ -60,7 +60,7 @@ def state_from(url: str) -> str:
 
 def connect(service: HmrcConnectionService, landlord_id: UUID):
     start = service.start(landlord_id)
-    return service.complete("good-code", state_from(start.authorize_url), start.nonce)
+    return service.complete("good-code", state_from(start.authorize_url), start.nonce).connection
 
 
 def test_authorize_url_asks_hmrc_for_the_right_things(service, landlord_id) -> None:
@@ -158,3 +158,34 @@ def test_disconnect(service, repo, landlord_id) -> None:
     service.disconnect(landlord_id)
     assert service.status(landlord_id) is None
     service.disconnect(landlord_id)  # idempotent
+
+
+def test_the_return_path_rides_in_the_sealed_state(service, landlord_id) -> None:
+    start = service.start(landlord_id, "/tax/2026/q2")
+    done = service.complete("good-code", state_from(start.authorize_url), start.nonce)
+    assert done.return_to == "/tax/2026/q2"
+
+
+def test_return_path_defaults_to_hmrc_settings(service, landlord_id) -> None:
+    start = service.start(landlord_id)
+    done = service.complete("good-code", state_from(start.authorize_url), start.nonce)
+    assert done.return_to == "/settings/hmrc"
+
+
+@pytest.mark.parametrize(
+    ("state", "nonce", "code", "reason"),
+    [
+        ("tampered", "ok", "good-code", "expired"),
+        (None, "someone-elses-nonce", "good-code", "other_browser"),
+        (None, "ok", "bad-code", "rejected"),
+    ],
+)
+def test_failures_carry_a_reason_code(service, landlord_id, state, nonce, code, reason) -> None:
+    start = service.start(landlord_id)
+    with pytest.raises(HmrcConnectError) as caught:
+        service.complete(
+            code,
+            state or state_from(start.authorize_url),
+            start.nonce if nonce == "ok" else nonce,
+        )
+    assert caught.value.reason == reason

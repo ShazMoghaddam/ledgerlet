@@ -3,12 +3,17 @@
 /connect needs a signed-in landlord. /callback deliberately does not: it's a
 browser redirect from HMRC and carries no LedgerLet token. It's trusted through
 the sealed state plus the matching cookie instead (see service.py).
+
+/callback always ends by sending the browser back into the web app: to the
+page the landlord started from with ?hmrc=connected, or to the HMRC settings
+page with ?hmrc=error&reason=<code>.
 """
 
 from typing import Annotated
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, HTTPException, Response, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.core.config import get_settings
 from app.core.time import uk_today, utc_now
@@ -28,6 +33,7 @@ from app.modules.hmrc.schemas import (
     BusinessIdIn,
     BusinessRead,
     ConnectionStatus,
+    ConnectStartIn,
     ConnectStartRead,
     DiscoveryRead,
     FraudHeaderCheck,
@@ -39,7 +45,11 @@ from app.modules.hmrc.schemas import (
     SubmissionRequest,
     TaxpayerRead,
 )
-from app.modules.hmrc.service import STATE_MAX_AGE_SECONDS, HmrcConnectError
+from app.modules.hmrc.service import (
+    DEFAULT_RETURN_TO,
+    STATE_MAX_AGE_SECONDS,
+    HmrcConnectError,
+)
 from app.modules.landlords.dependencies import CurrentLandlord, CurrentLandlordId
 from app.modules.tax.periods import (
     PeriodBasis,
@@ -55,8 +65,13 @@ COOKIE_PATH = "/api/v1/hmrc"
 
 
 @router.post("/connect", response_model=ConnectStartRead)
-def start_connect(landlord_id: CurrentLandlordId, service: HmrcServiceDep, response: Response):
-    start = service.start(landlord_id)
+def start_connect(
+    landlord_id: CurrentLandlordId,
+    service: HmrcServiceDep,
+    response: Response,
+    payload: ConnectStartIn | None = None,
+):
+    start = service.start(landlord_id, (payload or ConnectStartIn()).return_to)
     response.set_cookie(
         STATE_COOKIE,
         start.nonce,
@@ -69,22 +84,34 @@ def start_connect(landlord_id: CurrentLandlordId, service: HmrcServiceDep, respo
     return ConnectStartRead(authorize_url=start.authorize_url)
 
 
-@router.get("/callback", response_model=ConnectionStatus)
+@router.get("/callback", response_class=RedirectResponse, status_code=303)
 def callback(
     service: HmrcServiceDep,
-    response: Response,
     code: str | None = None,
     state: str | None = None,
     error: str | None = None,
     nonce: Annotated[str | None, Cookie(alias=STATE_COOKIE)] = None,
-):
-    if error:
-        raise HmrcConnectError(f"HMRC approval was not completed ({error})")
-    if not code or not state:
-        raise HmrcConnectError("HMRC did not send back an approval code")
-    connection = service.complete(code, state, nonce)
-    response.delete_cookie(STATE_COOKIE, path=COOKIE_PATH)
-    return _status(connection)
+) -> RedirectResponse:
+    try:
+        if error:
+            # "access_denied" means the landlord chose not to approve at HMRC.
+            reason = "declined" if error == "access_denied" else "failed"
+            raise HmrcConnectError(f"HMRC approval was not completed ({error})", reason)
+        if not code or not state:
+            raise HmrcConnectError("HMRC did not send back an approval code", "invalid")
+        done = service.complete(code, state, nonce)
+        redirect = _back_to_app(done.return_to, {"hmrc": "connected"})
+    except HmrcConnectError as exc:
+        redirect = _back_to_app(DEFAULT_RETURN_TO, {"hmrc": "error", "reason": exc.reason})
+    redirect.delete_cookie(STATE_COOKIE, path=COOKIE_PATH)  # one attempt per start
+    return redirect
+
+
+def _back_to_app(path: str, params: dict[str, str]) -> RedirectResponse:
+    """path is trusted: it was checked on the way in and sealed inside the state."""
+    joiner = "&" if "?" in path else "?"
+    url = f"{get_settings().app_base_url.rstrip('/')}{path}{joiner}{urlencode(params)}"
+    return RedirectResponse(url, status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/connection", response_model=ConnectionStatus)

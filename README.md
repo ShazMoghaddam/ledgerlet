@@ -99,6 +99,13 @@ the HTTP error mapping, and sign-in token verification).
 | Archived properties still count for their periods | Selling a property mid-year doesn't remove its income |
 | `ownership_percentage` is the tax share | Couples default to 50/50 unless HMRC has a Form 17 |
 | Transactions lock at year-end final declaration | Quarterly updates are cumulative, so in-year corrections must stay possible |
+| One cross-property transaction list, newest first, paged | A landlord reads money like a bank statement, not one property at a time |
+| List totals cover every match, at share, rounded per property per category | Same rule as the tax figures, so the list and the tax page always agree |
+| Search text that looks like an amount also matches amounts | Landlords look for "96" as often as "boiler" |
+| HMRC callback sends the browser back into the app | The landlord lands where they started, not on a page of JSON |
+| Only an app path is accepted as the return page, sealed in the state | The callback can't be used to bounce someone to another site |
+| Callback failures travel as short codes, never as text | Nobody can craft a link that makes LedgerLet display words of their choosing |
+| Sample data script mirrors the design boards, pinned by a test | Designs, demo and frontend tests all show the same, correct figures |
 
 ## Open questions for an accountant
 
@@ -133,6 +140,12 @@ python scripts/dev_auth.py token --sub alice --email alice@example.com
 ```
 
 API docs: http://127.0.0.1:8000/docs. Click **Authorize** and paste the token.
+
+Sample data (two properties and 29 transactions, the figures the designs use):
+
+```bash
+python scripts/seed_demo.py --sub alice
+```
 
 ## HMRC sandbox (local development)
 
@@ -182,8 +195,11 @@ GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every push.
    - 5a-i. Connect to HMRC: OAuth, encrypted tokens, refresh (done)
    - 5a-ii. Fraud prevention headers, validated by HMRC's test API (done)
    - 5b-i. NINO, business discovery, obligations (read-only) (done)
-   - 5b-ii. Cumulative quarterly submission and audit trail (this phase)
+   - 5b-ii. Cumulative quarterly submission and audit trail (done)
    - Later: year-end final declaration (and year-end transaction locking), encryption key rotation
    - Later: Gov-Client-Multi-Factor (with the chosen identity provider), Gov-Vendor-License-IDs
 6. React + Vite frontend
+   - 6a. API for the frontend: cross-property transactions, HMRC return to the app, sample data (this phase)
+   - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview
+   - 6c. Transactions, Tax and the HMRC submit flow
 7. Open banking as a second transaction source

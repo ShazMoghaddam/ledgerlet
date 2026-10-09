@@ -5,19 +5,24 @@ transaction is addressed directly by its id.
 """
 
 from datetime import date
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Query, status
 
+from app.core.money import from_pence
 from app.modules.landlords.dependencies import CurrentLandlordId
 from app.modules.transactions.categories import TransactionCategory
 from app.modules.transactions.dependencies import TransactionServiceDep
 from app.modules.transactions.schemas import (
     CategoryRead,
     TransactionCreate,
+    TransactionListItem,
+    TransactionPage,
     TransactionRead,
     TransactionUpdate,
 )
+from app.modules.transactions.service import TransactionFilters
 
 router = APIRouter(tags=["transactions"])
 
@@ -53,6 +58,42 @@ def list_transactions(
 ):
     return service.list_transactions(
         landlord_id, property_id, date_from=date_from, date_to=date_to, category=category
+    )
+
+
+@router.get("/transactions", response_model=TransactionPage)
+def search_transactions(
+    landlord_id: CurrentLandlordId,
+    service: TransactionServiceDep,
+    property_id: UUID | None = None,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    category: TransactionCategory | None = None,
+    q: Annotated[str | None, Query(max_length=100, description="Description or amount")] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    """All of the landlord's transactions across properties, newest first, one page at a time."""
+    filters = TransactionFilters(
+        property_id=property_id,
+        date_from=date_from,
+        date_to=date_to,
+        category=category,
+        search=q,
+    )
+    result = service.search_transactions(landlord_id, filters, limit=limit, offset=offset)
+    return TransactionPage(
+        items=[
+            TransactionListItem.model_validate(
+                {**TransactionRead.model_validate(t).model_dump(), "share_amount": from_pence(p)}
+            )
+            for t, p in result.rows
+        ],
+        total=result.total,
+        limit=limit,
+        offset=offset,
+        money_in=from_pence(result.money_in_pence),
+        money_out=from_pence(result.money_out_pence),
     )
 
 

@@ -9,6 +9,22 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.modules.hmrc.nino import normalise_nino
 from app.modules.tax.periods import PeriodBasis
 
+# A path in our app: starts with one "/", never "//" (another site) and never a backslash.
+RETURN_TO_PATTERN = r"^/([A-Za-z0-9_.~?=&%-][A-Za-z0-9/_.~?=&%-]*)?$"
+
+
+class ConnectStartIn(BaseModel):
+    """Where to send the landlord back to in the app once HMRC is done.
+
+    Only a path inside our own app is accepted ("/tax/2026/q2", never
+    "https://..." or "//evil.example"), so the callback can't be used to
+    bounce people to another site.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    return_to: str = Field(default="/settings/hmrc", max_length=200, pattern=RETURN_TO_PATTERN)
+
 
 class ConnectStartRead(BaseModel):
     authorize_url: str
