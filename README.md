@@ -229,8 +229,9 @@ created. If your volume already existed, create it once with:
 
 A phase is done when all four commands above pass, on SQLite **and** Postgres, and the
 frontend's checks pass. GitHub Actions (`.github/workflows/ci.yml`) runs the same gate on every
-push: the backend job, and a frontend job (generated types current, lint, formatting, types,
-unit tests, build, browser tests).
+push: the backend job, a frontend job (lint, formatting, types, unit tests, build, browser
+tests), and a contract job that regenerates the frontend's API types and test fixtures from the
+backend and fails if they've changed without being committed.
 
 ## Roadmap
 
