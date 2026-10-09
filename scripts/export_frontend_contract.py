@@ -8,8 +8,9 @@ Writes, under frontend/:
 
 The responses come from the real app: an in-memory database, the sample data, and
 "today" fixed at 9 October 2026, so the figures match the design boards and tests
-never depend on the date they run. CI runs this and fails if the output changes
-without being committed, so the frontend can't drift from the backend.
+never depend on the date they run. CI runs this, regenerates the TypeScript types,
+and fails if the types or fixtures change without being committed, so the frontend
+can't drift from the backend.
 
 HMRC responses aren't exported (they need HMRC); the frontend's own fixtures cover them.
 """
