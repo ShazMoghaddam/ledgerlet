@@ -147,6 +147,9 @@ Sample data (two properties and 29 transactions, the figures the designs use):
 python scripts/seed_demo.py --sub alice
 ```
 
+To try importing, `scripts/samples/oak-road-statement.csv` is a small Oak Road bank statement with
+new rows, two possible duplicates of the sample data and one row that can't be read.
+
 ## Web app (local development)
 
 Needs Node 20.19 or newer (`brew install node`). Run the API as above, then in a second tab:
@@ -192,6 +195,11 @@ cd frontend && npm run api:types              # TypeScript types from openapi.js
 | List filters, search and page live in the URL | A filtered list survives refresh, Back, bookmarks and sharing |
 | Transaction detail: a panel on laptops, its own page below that | Context stays on wide screens; a phone gets the whole screen |
 | The API works out each row's share; the frontend never does sums on money | One rounding rule, tested once, in one place |
+| Import shows the landlord's own columns and guesses the mapping | Every bank names columns differently; a guess they can see and change beats a preset list |
+| Every row in the file is shown, including ones that won't import | Nothing disappears silently; unreadable rows say why |
+| New rows start ticked, possible duplicates unticked | The safe default; a genuine second payment is one tick away |
+| Categories suggested from the same description last time, exact match only | Predictable beats clever when the result goes to HMRC; the landlord still confirms each row |
+| Import steps held in the page, not the URL | A chosen file can't survive a reload, so a reload honestly starts again |
 | One navigation, three layouts: tab bar, rail, sidebar | Each screen size gets a fitting pattern; one set of links to maintain |
 | Some components render different structures by width (table vs list) | A phone gets a signed list, not a squeezed table |
 | Quarter state worked out from deadlines plus HMRC history | Updates are cumulative, so a later accepted update also covers earlier quarters |
@@ -257,8 +265,8 @@ backend and fails if they've changed without being committed.
 6. React + Vite frontend
    - 6a. API for the frontend: cross-property transactions, HMRC return to the app, sample data (done)
    - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview (done)
-   - 6c-i. Transactions: list, filters, detail, add, edit, delete (this phase)
-   - 6c-ii. CSV import
+   - 6c-i. Transactions: list, filters, detail, add, edit, delete (done)
+   - 6c-ii. CSV import (this phase)
    - 6c-iii. Tax year and quarter pages
    - 6c-iv. Review and submit to HMRC, and the HMRC connection page
 7. Open banking as a second transaction source

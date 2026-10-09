@@ -732,6 +732,7 @@ export interface components {
             amount: string | null;
             direction: components["schemas"]["Direction"] | null;
             suggested_kind: components["schemas"]["TransactionKind"] | null;
+            suggested_category?: components["schemas"]["TransactionCategory"] | null;
             /** Fingerprint */
             fingerprint: string | null;
         };

@@ -17,3 +17,7 @@ export type Category = Schemas["CategoryRead"];
 export type HmrcConnection = Schemas["ConnectionStatus"];
 export type Taxpayer = Schemas["TaxpayerRead"];
 export type Submission = Schemas["SubmissionRead"];
+export type ImportPreview = Schemas["ImportPreview"];
+export type PreviewRow = Schemas["PreviewRow"];
+export type ImportResult = Schemas["ImportResult"];
+export type ImportRowConfirm = Schemas["ImportRowConfirm"];

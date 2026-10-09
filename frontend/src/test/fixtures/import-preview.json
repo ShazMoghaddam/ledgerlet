@@ -1,0 +1,82 @@
+{
+  "property_id": "00000002-0000-0000-0000-000000000002",
+  "total": 6,
+  "new": 3,
+  "already_imported": 0,
+  "possible_duplicates": 2,
+  "invalid": 1,
+  "rows": [
+    {
+      "line": 2,
+      "status": "possible_duplicate",
+      "message": "A transaction with the same date and amount is already recorded",
+      "transaction_date": "2026-10-01",
+      "description": "OCTOBER RENT J BLOGGS",
+      "amount": "1600.00",
+      "direction": "in",
+      "suggested_kind": "income",
+      "suggested_category": null,
+      "fingerprint": "86eb40d14591ed28aa0175b04345f4240671fa65ece2e2f7eee59b8c3b18f457"
+    },
+    {
+      "line": 3,
+      "status": "possible_duplicate",
+      "message": "A transaction with the same date and amount is already recorded",
+      "transaction_date": "2026-10-03",
+      "description": "Boiler service",
+      "amount": "96.00",
+      "direction": "out",
+      "suggested_kind": "expense",
+      "suggested_category": "repairs_and_maintenance",
+      "fingerprint": "02c1673d73fa133b4740fb55e711526bef181fb2c3bf1f915a5a160acda7bee4"
+    },
+    {
+      "line": 4,
+      "status": "new",
+      "message": null,
+      "transaction_date": "2026-10-05",
+      "description": "Letting agent fee",
+      "amount": "144.00",
+      "direction": "out",
+      "suggested_kind": "expense",
+      "suggested_category": "professional_fees",
+      "fingerprint": "d0f53fb61ba0d627c67628f26fab92c0a7bf68be8b7e9c890fda8af8fe5254c0"
+    },
+    {
+      "line": 5,
+      "status": "new",
+      "message": null,
+      "transaction_date": "2026-10-06",
+      "description": "HOMESERVE PLC",
+      "amount": "18.50",
+      "direction": "out",
+      "suggested_kind": "expense",
+      "suggested_category": null,
+      "fingerprint": "3d7b5f59f6554671172a4fb9018f97d84e1f8e5956948213d678f670db25fb24"
+    },
+    {
+      "line": 6,
+      "status": "new",
+      "message": null,
+      "transaction_date": "2026-10-07",
+      "description": "COUNCIL TAX REFUND",
+      "amount": "42.00",
+      "direction": "in",
+      "suggested_kind": "income",
+      "suggested_category": null,
+      "fingerprint": "e036050c120326d87d11f6a294db137058e2aad34304681da217b6c7dd21367a"
+    },
+    {
+      "line": 7,
+      "status": "invalid",
+      "message": "Amount 'twelve' isn't a number",
+      "transaction_date": null,
+      "description": "Smoke alarm batteries",
+      "amount": null,
+      "direction": null,
+      "suggested_kind": null,
+      "suggested_category": null,
+      "fingerprint": null
+    }
+  ]
+}

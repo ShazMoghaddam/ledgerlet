@@ -102,7 +102,11 @@ class ImportService:
         existing_fps = {t.import_fingerprint for t in existing if t.import_fingerprint}
         existing_keys = {(t.transaction_date, t.amount_pence) for t in existing}
 
-        rows = [self._preview_row(r, fp, err, existing_fps, existing_keys) for r, fp, err in staged]
+        learned = self._learned_categories(landlord_id, property_id)
+        rows = [
+            self._preview_row(r, fp, err, existing_fps, existing_keys, learned)
+            for r, fp, err in staged
+        ]
         return ImportPreview(
             property_id=property_id,
             total=len(rows),
@@ -178,6 +182,19 @@ class ImportService:
             landlord_id, property_id, date_from=min(dates), date_to=max(dates)
         )
 
+    def _learned_categories(
+        self, landlord_id: UUID, property_id: UUID
+    ) -> dict[tuple[str, TransactionKind], TransactionCategory]:
+        """Description -> the category the landlord gave it most recently, at this property.
+
+        Exact match only (ignoring case and spacing): predictable beats clever when the
+        result decides what goes to HMRC. The landlord still confirms every row.
+        """
+        learned: dict[tuple[str, TransactionKind], TransactionCategory] = {}
+        for t in self._transactions.list_transactions(landlord_id, property_id):
+            learned[(_normalise(t.description), t.category.kind)] = t.category  # oldest first
+        return learned
+
     @staticmethod
     def _preview_row(
         row: ParsedRow,
@@ -185,6 +202,7 @@ class ImportService:
         error: str | None,
         existing_fps: set[str],
         existing_keys: set[tuple[date, int]],
+        learned: dict[tuple[str, TransactionKind], TransactionCategory],
     ) -> PreviewRow:
         if fp is None:
             status, message = RowStatus.INVALID, error
@@ -202,6 +220,7 @@ class ImportService:
             status, message = RowStatus.NEW, None
 
         valid = fp is not None
+        kind = KIND_FOR_DIRECTION[row.direction] if valid and row.direction else None
         return PreviewRow(
             line=row.line,
             status=status,
@@ -210,6 +229,13 @@ class ImportService:
             description=row.description,
             amount=from_pence(to_pence(row.amount)) if valid and row.amount else None,
             direction=row.direction if valid else None,
-            suggested_kind=KIND_FOR_DIRECTION[row.direction] if valid and row.direction else None,
+            suggested_kind=kind,
+            suggested_category=(
+                learned.get((_normalise(row.description), kind)) if kind is not None else None
+            ),
             fingerprint=fp,
         )
+
+
+def _normalise(description: str) -> str:
+    return " ".join(description.split()).casefold()

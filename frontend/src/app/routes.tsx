@@ -3,6 +3,7 @@ import type { RouteObject } from "react-router";
 import { RequireSignIn } from "../auth/RequireSignIn";
 import { AppShell } from "../components/AppShell";
 import { SignInPage } from "../features/auth/SignInPage";
+import { ImportPage } from "../features/import/ImportPage";
 import { OverviewPage } from "../features/overview/OverviewPage";
 import { EditTransactionPage, NewTransactionPage } from "../features/transactions/TransactionForm";
 import { TransactionsPage } from "../features/transactions/TransactionsPage";
@@ -24,10 +25,7 @@ export const routes: RouteObject[] = [
           { path: "transactions/:id", element: <TransactionsPage /> },
           { path: "transactions/:id/edit", element: <EditTransactionPage /> },
           { path: "transactions/new", element: <NewTransactionPage /> },
-          {
-            path: "transactions/import",
-            element: <SectionPlaceholder title="Import a bank statement" description={soon} />,
-          },
+          { path: "transactions/import", element: <ImportPage /> },
           { path: "tax", element: <SectionPlaceholder title="Tax" description={soon} /> },
           {
             path: "tax/:year/:quarter/submit",

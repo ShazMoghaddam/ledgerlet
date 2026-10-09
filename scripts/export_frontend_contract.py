@@ -28,6 +28,8 @@ from sqlalchemy.pool import StaticPool
 import app.models  # noqa: F401  (registers every table)
 from app.core.database import Base, get_db
 from app.main import create_app
+from app.modules.imports.dependencies import get_import_service
+from app.modules.imports.service import ImportService
 from app.modules.landlords.dependencies import get_current_landlord
 from app.modules.landlords.models import Landlord
 from app.modules.properties.dependencies import PropertyServiceDep
@@ -40,6 +42,7 @@ from scripts.seed_demo import DATA_TODAY, seed
 
 ROOT = Path(__file__).resolve().parent.parent / "frontend"
 FIXTURES = ROOT / "src" / "test" / "fixtures"
+SAMPLE_STATEMENT = Path(__file__).resolve().parent / "samples" / "oak-road-statement.csv"
 STAMP = datetime(2026, 10, 9, 9, 0, tzinfo=UTC)
 
 # name -> (path, query). Each becomes src/test/fixtures/<name>.json.
@@ -79,6 +82,11 @@ def main() -> None:
     api.dependency_overrides[get_current_landlord] = lambda: landlord
     api.dependency_overrides[get_tax_service] = tax_service
 
+    def import_service(properties: PropertyServiceDep, transactions: TransactionServiceDep):
+        return ImportService(properties=properties, transactions=transactions, today=_fixed_today)
+
+    api.dependency_overrides[get_import_service] = import_service
+
     ROOT.joinpath("openapi.json").write_text(json.dumps(api.openapi(), indent=2) + "\n")
     FIXTURES.mkdir(parents=True, exist_ok=True)
     with TestClient(api) as client:
@@ -89,7 +97,23 @@ def main() -> None:
             resp.raise_for_status()
             text = json.dumps(resp.json(), indent=2) + "\n"
             FIXTURES.joinpath(f"{name}.json").write_text(_apply(text, ids))
-    print(f"Wrote openapi.json and {len(RESPONSES) + 1} fixtures under {ROOT}")
+
+        # The sample bank statement, previewed for Oak Road: new rows, possible
+        # duplicates of seeded ones, suggested categories and a row that can't be read.
+        oak = session.query(Property).filter_by(nickname="Oak Road").one()
+        resp = client.post(
+            f"/api/v1/properties/{oak.id}/imports/preview",
+            files={"file": ("statement.csv", SAMPLE_STATEMENT.read_bytes(), "text/csv")},
+            data={
+                "date_column": "Date",
+                "description_column": "Description",
+                "amount_column": "Amount",
+            },
+        )
+        resp.raise_for_status()
+        text = json.dumps(resp.json(), indent=2) + "\n"
+        FIXTURES.joinpath("import-preview.json").write_text(_apply(text, ids))
+    print(f"Wrote openapi.json and {len(RESPONSES) + 2} fixtures under {ROOT}")
 
 
 def _stabilise(session: Session) -> dict[str, str]:

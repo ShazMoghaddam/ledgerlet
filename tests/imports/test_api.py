@@ -120,3 +120,31 @@ def test_bad_fingerprint_is_422(client, landlord_id, property_id) -> None:
 
 def test_other_landlord_gets_404(client, other_landlord_id, property_id) -> None:
     assert preview(client, other_landlord_id, property_id).status_code == 404
+
+
+def test_preview_suggests_the_category_used_last_time(client, landlord_id, property_id) -> None:
+    body = preview(client, landlord_id, property_id).json()
+    assert {r["description"]: r["suggested_category"] for r in body["rows"]} == {
+        "J SMITH RENT": None,
+        "BRITISH GAS": None,
+        "BAD ROW": None,
+    }
+    client.post(
+        f"{PROPERTIES}/{property_id}/imports/confirm",
+        json=to_confirm(body),
+        headers=headers(landlord_id),
+    )
+
+    # Next month's statement: same payees, different dates and amounts, odd spacing.
+    october = (
+        b"Date,Description,Amount\n"
+        b"01/10/2026,j smith  rent,850.00\n"
+        b"03/10/2026,BRITISH GAS,-70.00\n"
+        b"04/10/2026,BRITISH GAS REFUND,5.00\n"
+    )
+    rows = preview(client, landlord_id, property_id, content=october).json()["rows"]
+    assert [r["suggested_category"] for r in rows] == [
+        "rental_income",
+        "premises_running_costs",
+        None,  # a different description, and money in: no guess
+    ]
