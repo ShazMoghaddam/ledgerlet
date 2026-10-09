@@ -18,9 +18,8 @@ def signed_in(who: str = "alice") -> dict[str, str]:
 def connect(client: TestClient, who: str = "alice") -> None:
     resp = client.post(f"{API}/connect", headers=headers(who))
     state = parse_qs(urlparse(resp.json()["authorize_url"]).query)["state"][0]
-    assert client.get(f"{API}/callback", params={"code": "good-code", "state": state}).json()[
-        "connected"
-    ]
+    resp = client.get(f"{API}/callback", params={"code": "good-code", "state": state})
+    assert resp.headers["location"].endswith("hmrc=connected")
 
 
 def test_nino_round_trip_is_masked(client: TestClient) -> None:

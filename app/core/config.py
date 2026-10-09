@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://ledgerlet:ledgerlet@localhost:5432/ledgerlet"
     sql_echo: bool = False
 
+    # Where the web app lives. After HMRC sign-in the browser is sent back here.
+    app_base_url: str = "http://localhost:5173"
+
     # Authentication (any OpenID Connect provider). Give the JWKS URL in production;
     # the JWKS file is only for local development with scripts/dev_auth.py.
     auth_issuer: str | None = None

@@ -8,21 +8,52 @@ Two collaborators, both injected as Protocols:
 """
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from datetime import date
+from decimal import Decimal, InvalidOperation
 from typing import Protocol
 from uuid import UUID
 
 from app.core.exceptions import BusinessRuleError, ConflictError, NotFoundError
-from app.core.money import to_pence
+from app.core.money import share_of, to_pence
 from app.core.time import uk_today
 from app.modules.properties.models import Property
-from app.modules.transactions.categories import TransactionCategory, TransactionSource
+from app.modules.transactions.categories import (
+    TransactionCategory,
+    TransactionKind,
+    TransactionSource,
+)
 from app.modules.transactions.models import Transaction
+from app.modules.transactions.repository import TransactionCriteria
 from app.modules.transactions.schemas import TransactionCreate, TransactionUpdate
 
 
 class PropertyLookup(Protocol):
     def get_property(self, landlord_id: UUID, property_id: UUID) -> Property: ...
+    def list_properties(
+        self, landlord_id: UUID, *, include_archived: bool = False
+    ) -> list[Property]: ...
+
+
+@dataclass(frozen=True)
+class TransactionFilters:
+    """What a landlord can filter the cross-property list by."""
+
+    property_id: UUID | None = None
+    date_from: date | None = None
+    date_to: date | None = None
+    category: TransactionCategory | None = None
+    search: str | None = None
+
+
+@dataclass(frozen=True)
+class SearchResult:
+    """A page of rows, plus figures for every matching row (all at the landlord's share)."""
+
+    rows: list[tuple[Transaction, int]]  # each transaction with its share, in pence
+    total: int
+    money_in_pence: int
+    money_out_pence: int
 
 
 class TransactionRepositoryProtocol(Protocol):
@@ -36,6 +67,13 @@ class TransactionRepositoryProtocol(Protocol):
         date_to: date | None = None,
         category: TransactionCategory | None = None,
     ) -> list[Transaction]: ...
+    def search(
+        self, criteria: TransactionCriteria, *, limit: int, offset: int
+    ) -> list[Transaction]: ...
+    def count(self, criteria: TransactionCriteria) -> int: ...
+    def sum_by_property_and_category(
+        self, criteria: TransactionCriteria
+    ) -> dict[tuple[UUID, TransactionCategory], int]: ...
     def delete(self, transaction: Transaction) -> None: ...
     def commit(self) -> None: ...
 
@@ -78,6 +116,52 @@ class TransactionService:
             raise BusinessRuleError("date_from must be on or before date_to")
         return self._repo.list_for_property(
             property_id, date_from=date_from, date_to=date_to, category=category
+        )
+
+    def search_transactions(
+        self, landlord_id: UUID, filters: TransactionFilters, *, limit: int, offset: int
+    ) -> SearchResult:
+        """Every property's transactions in one list, archived properties included.
+
+        Totals apply the share per property per category and round there, the
+        same rule the tax module uses, so they agree with the tax figures.
+        """
+        if filters.date_from and filters.date_to and filters.date_from > filters.date_to:
+            raise BusinessRuleError("date_from must be on or before date_to")
+        if filters.property_id is not None:
+            properties = [self._properties.get_property(landlord_id, filters.property_id)]
+        else:
+            properties = self._properties.list_properties(landlord_id, include_archived=True)
+        if not properties:
+            return SearchResult(rows=[], total=0, money_in_pence=0, money_out_pence=0)
+
+        shares = {p.id: p.ownership_percentage for p in properties}
+        text = (filters.search or "").strip() or None
+        criteria = TransactionCriteria(
+            property_ids=list(shares),
+            date_from=filters.date_from,
+            date_to=filters.date_to,
+            category=filters.category,
+            text=text,
+            amount_pence=_amount_in(text),
+        )
+
+        money_in = money_out = 0
+        for (property_id, category), pence in self._repo.sum_by_property_and_category(
+            criteria
+        ).items():
+            share = share_of(pence, shares[property_id])
+            if category.kind is TransactionKind.INCOME:
+                money_in += share
+            else:
+                money_out += share
+
+        page = self._repo.search(criteria, limit=limit, offset=offset)
+        return SearchResult(
+            rows=[(t, share_of(t.amount_pence, shares[t.property_id])) for t in page],
+            total=self._repo.count(criteria),
+            money_in_pence=money_in,
+            money_out_pence=money_out,
         )
 
     # Commands
@@ -169,3 +253,22 @@ class TransactionService:
                 "This transaction is in a tax year already finalised with HMRC and can't be "
                 "changed. Record a correcting transaction instead."
             )
+
+
+MAX_AMOUNT = Decimal("10000000000")  # the largest amount the API accepts is just under this
+
+
+def _amount_in(text: str | None) -> int | None:
+    """ "96", "96.00", "£1,200" and the like are also searched as amounts, in pence."""
+    if not text:
+        return None
+    cleaned = text.replace("£", "").replace(",", "").strip()
+    try:
+        amount = Decimal(cleaned)
+    except InvalidOperation:
+        return None
+    if not amount.is_finite() or amount.as_tuple().exponent < -2:
+        return None
+    if not 0 < amount < MAX_AMOUNT:  # also keeps huge numbers out of the SQL
+        return None
+    return to_pence(amount)

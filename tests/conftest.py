@@ -102,7 +102,8 @@ def client(
     app.dependency_overrides[get_oauth_settings] = lambda: TEST_OAUTH_SETTINGS
     app.dependency_overrides[get_fraud_validator] = lambda: fake_fraud_validator
     app.dependency_overrides[get_hmrc_api] = lambda: fake_hmrc_api
-    with TestClient(app) as test_client:
+    # Redirects are asserted, not followed: the HMRC callback sends the browser to the web app.
+    with TestClient(app, follow_redirects=False) as test_client:
         yield test_client
 
 

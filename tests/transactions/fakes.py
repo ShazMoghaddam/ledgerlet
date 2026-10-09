@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 from app.core.time import utc_now
 from app.modules.transactions.categories import TransactionCategory
 from app.modules.transactions.models import Transaction
+from app.modules.transactions.repository import TransactionCriteria
 
 
 class FakeTransactionRepository:
@@ -42,6 +43,44 @@ class FakeTransactionRepository:
             and (category is None or t.category == category)
         ]
         return sorted(found, key=lambda t: (t.transaction_date, t.created_at))
+
+    def _matching(self, c: TransactionCriteria) -> list[Transaction]:
+        def matches(t: Transaction) -> bool:
+            text_ok = not c.text or (
+                c.text.lower() in t.description.lower()
+                or (c.amount_pence is not None and t.amount_pence == c.amount_pence)
+            )
+            return (
+                t.property_id in c.property_ids
+                and (c.date_from is None or t.transaction_date >= c.date_from)
+                and (c.date_to is None or t.transaction_date <= c.date_to)
+                and (c.category is None or t.category == c.category)
+                and text_ok
+            )
+
+        return [t for t in self.items.values() if matches(t)]
+
+    def search(
+        self, criteria: TransactionCriteria, *, limit: int, offset: int
+    ) -> list[Transaction]:
+        found = sorted(
+            self._matching(criteria),
+            key=lambda t: (t.transaction_date, t.created_at),
+            reverse=True,
+        )
+        return found[offset : offset + limit]
+
+    def count(self, criteria: TransactionCriteria) -> int:
+        return len(self._matching(criteria))
+
+    def sum_by_property_and_category(
+        self, criteria: TransactionCriteria
+    ) -> dict[tuple[UUID, TransactionCategory], int]:
+        totals: dict[tuple[UUID, TransactionCategory], int] = {}
+        for t in self._matching(criteria):
+            key = (t.property_id, t.category)
+            totals[key] = totals.get(key, 0) + t.amount_pence
+        return totals
 
     def delete(self, transaction: Transaction) -> None:
         del self.items[transaction.id]

@@ -8,23 +8,16 @@ The rounding rule, written down so totals are reproducible:
 
 from collections.abc import Iterable
 from dataclasses import dataclass
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 from typing import Protocol, Self
 
+from app.core.money import share_of
 from app.modules.transactions.categories import TransactionCategory, TransactionKind
-
-_WHOLE_PENNY = Decimal("1")
 
 
 class HasCategoryAndAmount(Protocol):
     category: TransactionCategory
     amount_pence: int
-
-
-def share_of(amount_pence: int, ownership_percentage: Decimal) -> int:
-    """50% of 101p is 50.5p, which rounds half up to 51p."""
-    exact = Decimal(amount_pence) * ownership_percentage / 100
-    return int(exact.quantize(_WHOLE_PENNY, rounding=ROUND_HALF_UP))
 
 
 def totals_by_category(items: Iterable[HasCategoryAndAmount]) -> dict[TransactionCategory, int]:
@@ -66,9 +59,7 @@ class Headline:
     def from_totals(cls, totals: dict[TransactionCategory, int]) -> Self:
         income = sum(p for c, p in totals.items() if c.kind is TransactionKind.INCOME)
         finance = totals[TransactionCategory.RESIDENTIAL_FINANCE_COSTS]
-        expenses = (
-            sum(p for c, p in totals.items() if c.kind is TransactionKind.EXPENSE) - finance
-        )
+        expenses = sum(p for c, p in totals.items() if c.kind is TransactionKind.EXPENSE) - finance
         return cls(
             income=income,
             expenses=expenses,

@@ -68,3 +68,29 @@ class CategoryRead(BaseModel):
     value: TransactionCategory
     label: str
     kind: TransactionKind
+
+
+class TransactionListItem(TransactionRead):
+    """A row in the cross-property list, with the landlord's share already worked out.
+
+    share_amount is for display. Tax totals are never built by adding these up:
+    they apply the share per property per category, as the tax module does.
+    """
+
+    share_amount: Decimal
+
+
+class TransactionPage(BaseModel):
+    """One page of transactions, plus totals for everything that matches (not just this page).
+
+    money_in and money_out are at the landlord's share. money_out includes
+    mortgage interest, because it is money paid out, even though HMRC treats
+    it separately from expenses.
+    """
+
+    items: list[TransactionListItem]
+    total: int
+    limit: int
+    offset: int
+    money_in: Decimal
+    money_out: Decimal

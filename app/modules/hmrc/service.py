@@ -32,7 +32,16 @@ REFRESH_MARGIN = timedelta(seconds=60)
 
 
 class HmrcConnectError(DomainError):
-    """The approval round-trip failed or couldn't be trusted (400)."""
+    """The approval round-trip failed or couldn't be trusted (400).
+
+    reason is a short fixed code the web app turns into its own message. Only
+    codes travel in the redirect back to the app, never free text, so nobody
+    can craft a link that makes LedgerLet display words of their choosing.
+    """
+
+    def __init__(self, message: str, reason: str = "failed") -> None:
+        super().__init__(message)
+        self.reason = reason
 
 
 class HmrcNotConnectedError(ConflictError):
@@ -47,10 +56,19 @@ class OAuthSettings:
     scopes: str
 
 
+DEFAULT_RETURN_TO = "/settings/hmrc"
+
+
 @dataclass(frozen=True)
 class ConnectStart:
     authorize_url: str
     nonce: str  # goes in the browser cookie
+
+
+@dataclass(frozen=True)
+class ConnectDone:
+    connection: HmrcConnection
+    return_to: str  # the page in the app the landlord started from
 
 
 class HmrcConnectionRepositoryProtocol(Protocol):
@@ -77,10 +95,19 @@ class HmrcConnectionService:
 
     # The round trip
 
-    def start(self, landlord_id: UUID) -> ConnectStart:
+    def start(self, landlord_id: UUID, return_to: str = DEFAULT_RETURN_TO) -> ConnectStart:
+        """return_to must already be a checked app path (see schemas.ConnectStartIn).
+
+        It rides inside the sealed state, so it can't be swapped on the way back.
+        """
         nonce = secrets.token_urlsafe(24)
         state = self._cipher.seal(
-            {"purpose": STATE_PURPOSE, "landlord_id": str(landlord_id), "nonce": nonce}
+            {
+                "purpose": STATE_PURPOSE,
+                "landlord_id": str(landlord_id),
+                "nonce": nonce,
+                "return_to": return_to,
+            }
         )
         query = urlencode(
             {
@@ -93,20 +120,26 @@ class HmrcConnectionService:
         )
         return ConnectStart(authorize_url=f"{self._settings.authorize_url}?{query}", nonce=nonce)
 
-    def complete(self, code: str, state: str, cookie_nonce: str | None) -> HmrcConnection:
+    def complete(self, code: str, state: str, cookie_nonce: str | None) -> ConnectDone:
         try:
             payload = self._cipher.open(state, STATE_MAX_AGE_SECONDS)
         except DecryptionError:
-            raise HmrcConnectError("This HMRC approval link is invalid or has expired") from None
+            raise HmrcConnectError(
+                "This HMRC approval link is invalid or has expired", "expired"
+            ) from None
         if payload.get("purpose") != STATE_PURPOSE:
-            raise HmrcConnectError("This HMRC approval link is invalid")
+            raise HmrcConnectError("This HMRC approval link is invalid", "invalid")
         if not cookie_nonce or not hmac.compare_digest(cookie_nonce, str(payload.get("nonce"))):
-            raise HmrcConnectError("Please start connecting to HMRC again from LedgerLet")
+            raise HmrcConnectError(
+                "Please start connecting to HMRC again from LedgerLet", "other_browser"
+            )
 
         try:
             grant = self._oauth.exchange_code(code)
         except HmrcAuthError:
-            raise HmrcConnectError("HMRC did not accept the approval. Please try again") from None
+            raise HmrcConnectError(
+                "HMRC did not accept the approval. Please try again", "rejected"
+            ) from None
 
         landlord_id = UUID(str(payload["landlord_id"]))
         connection = self._repo.get_for_landlord(landlord_id)
@@ -119,7 +152,7 @@ class HmrcConnectionService:
             self._store(connection, grant)
             connection.connected_at = self._clock()
         self._repo.commit()
-        return connection
+        return ConnectDone(connection, str(payload.get("return_to") or DEFAULT_RETURN_TO))
 
     # Using the connection
 
