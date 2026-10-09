@@ -1,0 +1,124 @@
+/* Form fields: label, optional hint, optional error, then the control. */
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  max-width: 35rem;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+}
+
+.error {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.hasError {
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-red);
+}
+
+.control {
+  width: 100%; /* a select is otherwise as wide as its longest option */
+  min-width: 0;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  font-size: var(--text-body); /* 16px stops phones zooming in */
+}
+
+.control[aria-invalid="true"] {
+  border: 2px solid var(--color-red);
+}
+
+select.control {
+  padding-right: var(--space-6);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23172B2E' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* An amount: "£" sits inside the box but isn't part of what's typed. */
+.money {
+  display: flex;
+  align-items: center;
+  max-width: 14rem;
+  min-height: var(--target-min);
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+}
+
+.money:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.money:has([aria-invalid="true"]) {
+  border: 2px solid var(--color-red);
+}
+
+.money span {
+  padding: 0 var(--space-2) 0 var(--space-3);
+  color: var(--color-slate);
+}
+
+.money input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Choices like "Money in / Money out". */
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font-weight: 600;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.choice:has(input:checked) {
+  border: 2px solid var(--color-ledger);
+  background: var(--color-ledger-tint);
+}
+
+.choice input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-ledger);
+}

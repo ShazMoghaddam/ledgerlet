@@ -102,6 +102,14 @@ class TransactionService:
             raise NotFoundError(f"Transaction {transaction_id} not found") from None
         return transaction
 
+    def get_transaction_with_share(
+        self, landlord_id: UUID, transaction_id: UUID
+    ) -> tuple[Transaction, int]:
+        """One transaction and the landlord's share of it, in pence (same rounding as lists)."""
+        transaction = self.get_transaction(landlord_id, transaction_id)
+        prop = self._properties.get_property(landlord_id, transaction.property_id)
+        return transaction, share_of(transaction.amount_pence, prop.ownership_percentage)
+
     def list_transactions(
         self,
         landlord_id: UUID,

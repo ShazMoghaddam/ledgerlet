@@ -1,0 +1,110 @@
+.detail {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* Laptop: a panel beside the list, ruled off, staying in view while scrolling. */
+.panel {
+  position: sticky;
+  top: var(--space-6);
+  padding-left: var(--space-6);
+  border-left: 1px solid var(--color-rule);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.head h1,
+.head h2 {
+  font-size: var(--text-section);
+}
+
+.page .head h1 {
+  font-size: var(--text-title);
+}
+
+.context {
+  color: var(--color-slate);
+  font-size: var(--text-small);
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--target-min);
+  height: var(--target-min);
+  margin: -8px -8px 0 0;
+  color: var(--color-ink);
+  border-radius: var(--radius-control);
+}
+
+.close:hover {
+  background: var(--color-shelf);
+  color: var(--color-ink);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--target-min);
+  font-weight: 600;
+}
+
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-rule);
+  font-size: var(--text-small);
+}
+
+.facts > div:last-child {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.facts dt {
+  color: var(--color-slate);
+}
+
+.facts dd {
+  margin: 0;
+  text-align: right;
+}
+
+.share dd {
+  font-weight: 600;
+}
+
+.note {
+  font-size: var(--text-small);
+  color: var(--color-slate);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.danger {
+  border-color: var(--color-red) !important;
+  color: var(--color-red) !important;
+}
+
+.danger:hover {
+  background: #fbeceb !important;
+}
+
+.dialogText {
+  font-size: var(--text-body);
+}

@@ -154,7 +154,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Transaction */
+        /**
+         * Get Transaction
+         * @description One transaction, with the landlord's share worked out as the list does.
+         */
         get: operations["get_transaction_api_v1_transactions__transaction_id__get"];
         put?: never;
         post?: never;
@@ -1539,7 +1542,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TransactionRead"];
+                    "application/json": components["schemas"]["TransactionListItem"];
                 };
             };
             /** @description Validation Error */

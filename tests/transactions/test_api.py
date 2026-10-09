@@ -266,3 +266,10 @@ def test_list_rejects_bad_paging(client, landlord_id) -> None:
     for params in ({"limit": 0}, {"limit": 201}, {"offset": -1}, {"q": "x" * 101}):
         resp = client.get(TRANSACTIONS, params=params, headers=headers(landlord_id))
         assert resp.status_code == 422, params
+
+
+def test_get_one_includes_the_landlords_share(client, landlord_id, both) -> None:
+    page = list_all(client, landlord_id, q="Boiler")
+    boiler_id = page["items"][0]["id"]
+    one = client.get(f"{TRANSACTIONS}/{boiler_id}", headers=headers(landlord_id)).json()
+    assert (one["amount"], one["share_amount"]) == ("96.00", "48.00")

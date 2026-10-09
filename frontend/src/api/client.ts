@@ -43,11 +43,25 @@ export class ApiError extends Error {
   }
 }
 
-/** Unwrap an openapi-fetch result: the data, or an ApiError. */
+/** Unwrap an openapi-fetch result: the data, or an ApiError with a message a person can act on. */
 export function unwrap<T>(result: { data?: T; error?: unknown; response: Response }): T {
   if (result.data !== undefined) return result.data;
-  const detail = (result.error as { detail?: unknown } | undefined)?.detail;
-  const message =
-    typeof detail === "string" ? detail : `Request failed (${result.response.status})`;
-  throw new ApiError(result.response.status, message);
+  // A 204 (deleted, nothing to return) has no body and that's success.
+  if (result.response.ok) return undefined as T;
+  throw new ApiError(result.response.status, messageFor(result.response.status, result.error));
+}
+
+function messageFor(status: number, error: unknown): string {
+  const detail = (error as { detail?: unknown } | undefined)?.detail;
+  if (typeof detail === "string") return detail;
+  // FastAPI validation errors: a list of {msg} objects, or of strings.
+  if (Array.isArray(detail) && detail.length > 0) {
+    return detail
+      .map((d) => (typeof d === "string" ? d : String((d as { msg?: unknown }).msg ?? "")))
+      .filter(Boolean)
+      .join(". ");
+  }
+  if (status >= 500) return "Something went wrong on LedgerLet’s side. Try again in a moment.";
+  if (status === 404) return "It may have been deleted, or the link is wrong.";
+  return `The request didn’t work (${status}).`;
 }

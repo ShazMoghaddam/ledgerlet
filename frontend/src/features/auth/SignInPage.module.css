@@ -2,6 +2,8 @@
   display: grid;
   min-height: 100dvh;
   place-items: center;
+  align-content: center;
+  gap: var(--space-5);
   padding: var(--space-5);
   background: var(--color-shelf);
 }
@@ -64,4 +66,10 @@
 
 .field textarea[aria-invalid="true"] {
   border: 2px solid var(--color-red);
+}
+
+.footer {
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  text-align: center;
 }
