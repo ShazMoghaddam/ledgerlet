@@ -5,13 +5,16 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api, unwrap } from "./client";
+import type { TransactionCategory } from "./types";
 
 export const keys = {
   me: ["me"] as const,
   properties: ["properties"] as const,
   obligations: (taxYear?: number) => ["tax", "obligations", taxYear ?? "current"] as const,
   summary: (taxYear: number, quarter: number) => ["tax", "summary", taxYear, quarter] as const,
-  transactions: (params: TransactionParams) => ["transactions", params] as const,
+  transactions: (params: TransactionParams) => ["transactions", "list", params] as const,
+  transaction: (id: string) => ["transactions", "one", id] as const,
+  categories: ["categories"] as const,
   hmrcConnection: ["hmrc", "connection"] as const,
   taxpayer: ["hmrc", "taxpayer"] as const,
   submissions: (taxYear: number) => ["hmrc", "submissions", taxYear] as const,
@@ -23,6 +26,7 @@ export interface TransactionParams {
   property_id?: string;
   date_from?: string;
   date_to?: string;
+  category?: TransactionCategory;
   q?: string;
 }
 
@@ -83,4 +87,23 @@ export const useSubmissions = (taxYear: number | undefined) =>
       unwrap(
         await api.GET("/api/v1/hmrc/submissions", { params: { query: { tax_year: taxYear } } }),
       ),
+  });
+
+export const useTransaction = (id: string | undefined) =>
+  useQuery({
+    queryKey: keys.transaction(id ?? ""),
+    enabled: id !== undefined,
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/transactions/{transaction_id}", {
+          params: { path: { transaction_id: id ?? "" } },
+        }),
+      ),
+  });
+
+export const useCategories = () =>
+  useQuery({
+    queryKey: keys.categories,
+    staleTime: Infinity, // fixed by HMRC; they don't change while the app is open
+    queryFn: async () => unwrap(await api.GET("/api/v1/transactions/categories")),
   });

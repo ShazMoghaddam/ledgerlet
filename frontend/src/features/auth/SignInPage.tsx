@@ -33,6 +33,13 @@ export function SignInPage() {
         </h1>
         {import.meta.env.DEV ? <DevTokenForm next={next} /> : <p>Sign-in isn’t available yet.</p>}
       </div>
+      <footer className={s.footer}>
+        © 2026 LedgerLet. Built in London by{" "}
+        <a href="https://shazmoghaddam.github.io/" rel="author">
+          Shaz Moghaddam
+        </a>
+        .
+      </footer>
     </main>
   );
 }
@@ -50,7 +57,7 @@ function DevTokenForm({ next }: { next: string }) {
       return;
     }
     signIn(value);
-    navigate(next, { replace: true });
+    navigate(next, { replace: true, state: { signedIn: true } });
   }
 
   return (

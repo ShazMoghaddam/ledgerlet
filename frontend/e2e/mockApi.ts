@@ -9,6 +9,7 @@ import summaryQ2 from "../src/test/fixtures/summary-q2.json" with { type: "json"
 import summaryQ3 from "../src/test/fixtures/summary-q3.json" with { type: "json" };
 import recent from "../src/test/fixtures/transactions-recent.json" with { type: "json" };
 import page1 from "../src/test/fixtures/transactions-page-1.json" with { type: "json" };
+import boiler from "../src/test/fixtures/transaction-boiler.json" with { type: "json" };
 
 const connection = {
   connected: true,
@@ -65,6 +66,7 @@ export async function asSampleLandlord(page: Page) {
       case "/hmrc/submissions":
         return json(submissions);
       default:
+        if (path === `/transactions/${boiler.id}`) return json(boiler);
         return route.fulfill({ status: 404, json: { detail: `No mock for ${path}` } });
     }
   });

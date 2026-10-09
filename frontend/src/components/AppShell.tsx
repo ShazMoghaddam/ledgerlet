@@ -102,14 +102,19 @@ function NavFooter({ yearLabel }: { yearLabel: string }) {
  * Not on first load: the browser handles that.
  */
 function useFocusHeadingOnNavigate() {
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
   const first = useRef(true);
   useEffect(() => {
     if (first.current) {
       first.current = false;
+      // Arriving from the sign-in page: start at the top of the content, rather than
+      // wherever the browser left focus when the sign-in form went away.
+      if ((state as { signedIn?: boolean } | null)?.signedIn)
+        document.getElementById("main")?.focus();
       return;
     }
     const heading = document.getElementById("page-heading") ?? document.getElementById("main");
     heading?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on page changes
   }, [pathname]);
 }

@@ -1,0 +1,184 @@
+.layout {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* never wider than its column */
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.header h1 {
+  font-size: var(--text-title);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Filters: inline on laptops; a Filters button plus removable chips below that. */
+.toolbar {
+  display: flex;
+  gap: var(--space-2);
+  align-items: end;
+}
+
+.search {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+}
+
+.searchBox:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.searchBox input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--text-body);
+}
+
+.inlineFilters {
+  display: none;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-caption);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-ledger-tint);
+  color: var(--color-ledger);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fixedChip {
+  color: var(--color-slate);
+}
+
+.summary {
+  color: var(--color-slate);
+  font-size: var(--text-small);
+}
+
+.summary strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+  color: var(--color-slate);
+}
+
+.pager div {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.pager a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-weight: 600;
+}
+
+.dialogFields {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (min-width: 1200px) {
+  .filtersButton,
+  .chips {
+    display: none;
+  }
+
+  .inlineFilters {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .inlineFilters select {
+    width: 12rem;
+  }
+
+  .withPanel {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+    align-items: start;
+  }
+
+  /* With the detail panel open there's less room: filters go back behind the button. */
+  .compact .inlineFilters {
+    display: none;
+  }
+
+  .compact .filtersButton {
+    display: inline-flex;
+  }
+
+  .compact .chips {
+    display: flex;
+  }
+}

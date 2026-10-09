@@ -708,6 +708,7 @@
           "transactions"
         ],
         "summary": "Get Transaction",
+        "description": "One transaction, with the landlord's share worked out as the list does.",
         "operationId": "get_transaction_api_v1_transactions__transaction_id__get",
         "security": [
           {
@@ -732,7 +733,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransactionRead"
+                  "$ref": "#/components/schemas/TransactionListItem"
                 }
               }
             }

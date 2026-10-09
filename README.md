@@ -186,7 +186,12 @@ cd frontend && npm run api:types              # TypeScript types from openapi.js
 | Money handled as whole pence parsed from strings | No floating point anywhere near an amount; `parseFloat` is banned by lint |
 | Dates as calendar days in UTC; "today" is today in the UK | A day never shifts with the device's time zone; tax rules use UK dates |
 | Hand-built components, CSS modules and design tokens | The look is LedgerLet's own, not a component library's |
-| React Aria for complex widgets (from the next phase) | Accessible date and number fields that would be hard to get right by hand |
+| Native date, select and dialog controls; no widget library | Phones get their own pickers, screen readers know them, and nothing stores money as a JavaScript number (why React Aria's number field was dropped) |
+| Amounts typed as text and converted straight to pence | "£1,200.50", "96" and "96.5" all work; mistakes get a plain-English message |
+| All of a form's problems listed at the top, each linked to its field | Nobody hunts for what's wrong; screen readers hear the list first |
+| List filters, search and page live in the URL | A filtered list survives refresh, Back, bookmarks and sharing |
+| Transaction detail: a panel on laptops, its own page below that | Context stays on wide screens; a phone gets the whole screen |
+| The API works out each row's share; the frontend never does sums on money | One rounding rule, tested once, in one place |
 | One navigation, three layouts: tab bar, rail, sidebar | Each screen size gets a fitting pattern; one set of links to maintain |
 | Some components render different structures by width (table vs list) | A phone gets a signed list, not a squeezed table |
 | Quarter state worked out from deadlines plus HMRC history | Updates are cumulative, so a later accepted update also covers earlier quarters |
@@ -251,6 +256,9 @@ backend and fails if they've changed without being committed.
    - Later: Gov-Client-Multi-Factor (with the chosen identity provider), Gov-Vendor-License-IDs
 6. React + Vite frontend
    - 6a. API for the frontend: cross-property transactions, HMRC return to the app, sample data (done)
-   - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview (this phase)
-   - 6c. Transactions, Tax and the HMRC submit flow
+   - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview (done)
+   - 6c-i. Transactions: list, filters, detail, add, edit, delete (this phase)
+   - 6c-ii. CSV import
+   - 6c-iii. Tax year and quarter pages
+   - 6c-iv. Review and submit to HMRC, and the HMRC connection page
 7. Open banking as a second transaction source

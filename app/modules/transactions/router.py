@@ -83,12 +83,7 @@ def search_transactions(
     )
     result = service.search_transactions(landlord_id, filters, limit=limit, offset=offset)
     return TransactionPage(
-        items=[
-            TransactionListItem.model_validate(
-                {**TransactionRead.model_validate(t).model_dump(), "share_amount": from_pence(p)}
-            )
-            for t, p in result.rows
-        ],
+        items=[_with_share(t, p) for t, p in result.rows],
         total=result.total,
         limit=limit,
         offset=offset,
@@ -97,11 +92,13 @@ def search_transactions(
     )
 
 
-@router.get("/transactions/{transaction_id}", response_model=TransactionRead)
+@router.get("/transactions/{transaction_id}", response_model=TransactionListItem)
 def get_transaction(
     transaction_id: UUID, landlord_id: CurrentLandlordId, service: TransactionServiceDep
 ):
-    return service.get_transaction(landlord_id, transaction_id)
+    """One transaction, with the landlord's share worked out as the list does."""
+    transaction, share = service.get_transaction_with_share(landlord_id, transaction_id)
+    return _with_share(transaction, share)
 
 
 @router.patch("/transactions/{transaction_id}", response_model=TransactionRead)
@@ -119,3 +116,8 @@ def delete_transaction(
     transaction_id: UUID, landlord_id: CurrentLandlordId, service: TransactionServiceDep
 ) -> None:
     service.delete_transaction(landlord_id, transaction_id)
+
+
+def _with_share(transaction, share_pence: int) -> TransactionListItem:
+    read = TransactionRead.model_validate(transaction).model_dump()
+    return TransactionListItem.model_validate({**read, "share_amount": from_pence(share_pence)})

@@ -82,12 +82,14 @@ def main() -> None:
     ROOT.joinpath("openapi.json").write_text(json.dumps(api.openapi(), indent=2) + "\n")
     FIXTURES.mkdir(parents=True, exist_ok=True)
     with TestClient(api) as client:
-        for name, (path, query) in RESPONSES.items():
+        boiler = session.query(Transaction).filter_by(description="Boiler service").one()
+        responses = {**RESPONSES, "transaction-boiler": (f"/api/v1/transactions/{boiler.id}", {})}
+        for name, (path, query) in responses.items():
             resp = client.get(path, params=query)
             resp.raise_for_status()
             text = json.dumps(resp.json(), indent=2) + "\n"
             FIXTURES.joinpath(f"{name}.json").write_text(_apply(text, ids))
-    print(f"Wrote openapi.json and {len(RESPONSES)} fixtures under {ROOT}")
+    print(f"Wrote openapi.json and {len(RESPONSES) + 1} fixtures under {ROOT}")
 
 
 def _stabilise(session: Session) -> dict[str, str]:
