@@ -40,6 +40,13 @@ test("importing a statement, step by step, at every size", async ({ page }) => {
   expect(uploads[0]).toContain(`filename="oak-road-statement.csv"`);
   await checkPage(page);
 
+  // Pressing Import too early explains why, beside the button, and goes to the row.
+  await page.getByRole("button", { name: "Import 3 transactions" }).click();
+  await expect(page.getByText("2 rows need a category.")).toBeInViewport();
+  await expect(page.getByLabel(/Category for HOMESERVE PLC/)).toBeFocused();
+  await expect(page.getByLabel(/Category for HOMESERVE PLC/)).toBeInViewport();
+  await checkPage(page);
+
   await page.getByLabel(/Category for HOMESERVE PLC/).selectOption("premises_running_costs");
   await page.getByLabel(/Category for COUNCIL TAX REFUND/).selectOption("other_income");
   await page.getByRole("button", { name: "Import 3 transactions" }).click();
