@@ -1,0 +1,79 @@
+/*
+ * LedgerLet design tokens. The single source for colour, type and spacing.
+ * Components use these variables only, never raw values.
+ *
+ * Every text colour passes WCAG AA on --color-paper. Status is never colour
+ * alone: it always has words, and usually an icon or shape.
+ */
+:root {
+  /* Colour */
+  --color-paper: #ffffff;
+  --color-shelf: #f1f4f3; /* navigation, sheets behind content */
+  --color-ink: #172b2e; /* text, totals rules, sent quarters (14.8:1) */
+  --color-slate: #4a5d61; /* secondary text, captions (6.9:1) */
+  --color-rule: #d3dcda; /* row dividers */
+  --color-rule-strong: var(--color-ink);
+  --color-field: #4a5d61; /* input borders: 3:1 or better against paper */
+  --color-ledger: #0e5e57; /* primary actions, links, ready to send (7.6:1) */
+  --color-ledger-hover: #0a4a44;
+  --color-ledger-tint: #e2eeea; /* selected rows, current navigation item */
+  --color-amber: #8a4b00; /* due soon, needs attention (on --color-amber-tint 6.0:1) */
+  --color-amber-tint: #fbefd9;
+  --color-red: #a1262b; /* errors and destructive actions only (7.3:1) */
+  --color-disabled-bg: #e4e9e8;
+  --color-disabled-text: #5d6e72;
+  --color-focus: var(--color-ink);
+
+  /* Type */
+  --font-sans:
+    "Source Sans 3 Variable", "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+
+  --text-caption: 0.875rem; /* 14 */
+  --text-small: 0.9375rem; /* 15: tables */
+  --text-body: 1rem; /* 16 */
+  --text-lead: 1.0625rem; /* 17 */
+  --text-section: 1.375rem; /* 22: serif section headings */
+  --text-title: 1.75rem; /* 28: serif page titles on phone */
+  --text-key-figure: 1.875rem; /* 30 */
+
+  --leading-tight: 1.2;
+  --leading-body: 1.5;
+
+  /* Space: a 4px scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Shape */
+  --radius-control: 4px;
+  --radius-sheet: 8px;
+  --shadow-overlay: 0 8px 28px rgb(23 43 46 / 0.18); /* sheets, menus, dialogs only */
+  --target-min: 44px;
+
+  /* Layout */
+  --nav-rail: 88px;
+  --nav-sidebar: 240px;
+  --tabbar-height: 64px;
+  --content-max: 80rem; /* 1280 */
+  --page-gutter: var(--space-5);
+}
+
+/* Bigger titles once there's room. Phone sizes step down one level. */
+@media (min-width: 768px) {
+  :root {
+    --text-title: 2.125rem; /* 34 */
+    --page-gutter: var(--space-6);
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --page-gutter: var(--space-7);
+  }
+}

@@ -1,0 +1,99 @@
+/* Element defaults. Components style themselves with CSS modules. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-variant-numeric: lining-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+}
+
+p,
+dl,
+dd,
+ol,
+ul,
+figure {
+  margin: 0;
+}
+
+a {
+  color: var(--color-ledger);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--color-ledger-hover);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* One visible focus style everywhere: an ink outline clear of the element. */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Headings receive focus after navigation; don't draw a ring around them. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

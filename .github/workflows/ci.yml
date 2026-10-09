@@ -1,5 +1,7 @@
 # The phase gate, run automatically on every push and pull request.
-# Same checks as locally: lint, tests on SQLite, migrations, tests on Postgres.
+# Backend: lint, tests on SQLite, migrations, tests on Postgres.
+# Frontend: lint, format, types, unit tests, build, browser tests.
+# Contract: the frontend is built against the API as it is now.
 
 name: CI
 
@@ -66,3 +68,86 @@ jobs:
         env:
           LEDGERLET_TEST_DATABASE_URL: postgresql+psycopg://ledgerlet:ledgerlet@localhost:5432/ledgerlet_test
         run: python -m pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Types
+        run: npm run typecheck
+
+      - name: Unit and component tests
+        run: npm test
+
+      - name: Browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests (phone, tablet, laptop, with accessibility checks)
+        run: npm run test:e2e
+
+      - name: Keep the browser test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 7
+
+  contract:
+    # Regenerates, from the backend, what the frontend is built against: the TypeScript
+    # types and the sample-data responses its tests use. Fails if either has changed
+    # without being committed. openapi.json itself isn't compared byte for byte: its
+    # wording varies between pydantic versions without the API changing.
+    # If this fails: `python -m scripts.export_frontend_contract`, then in frontend/
+    # `npm run api:types`, and commit the result.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: |
+          python -m pip install -e ".[dev]"
+          npm ci --prefix frontend
+
+      - name: Export the contract from the backend
+        run: python -m scripts.export_frontend_contract
+
+      - name: Generate the frontend's API types
+        run: npm run api:types --prefix frontend
+
+      - name: The frontend is built against the current API
+        run: git diff --exit-code -- frontend/src/api/schema.d.ts frontend/src/test/fixtures

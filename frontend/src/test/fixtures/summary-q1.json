@@ -1,0 +1,118 @@
+{
+  "tax_year": 2026,
+  "tax_year_label": "2026-27",
+  "quarter": 1,
+  "basis": "standard",
+  "period_start": "2026-04-06",
+  "period_end": "2026-07-05",
+  "deadline": "2026-08-07",
+  "status": "past_deadline",
+  "totals": {
+    "income": "6000.00",
+    "expenses": "596.00",
+    "residential_finance_costs": "1470.00",
+    "profit": "5404.00"
+  },
+  "categories": [
+    {
+      "category": "rental_income",
+      "label": "Rental income",
+      "kind": "income",
+      "amount": "6000.00"
+    },
+    {
+      "category": "lease_premium",
+      "label": "Premiums for the grant of a lease",
+      "kind": "income",
+      "amount": "0.00"
+    },
+    {
+      "category": "reverse_premium",
+      "label": "Reverse premiums and inducements",
+      "kind": "income",
+      "amount": "0.00"
+    },
+    {
+      "category": "other_income",
+      "label": "Other property income",
+      "kind": "income",
+      "amount": "0.00"
+    },
+    {
+      "category": "premises_running_costs",
+      "label": "Rent, rates, insurance and ground rent",
+      "kind": "expense",
+      "amount": "0.00"
+    },
+    {
+      "category": "repairs_and_maintenance",
+      "label": "Repairs and maintenance",
+      "kind": "expense",
+      "amount": "380.00"
+    },
+    {
+      "category": "non_residential_finance_costs",
+      "label": "Non-residential property finance costs",
+      "kind": "expense",
+      "amount": "0.00"
+    },
+    {
+      "category": "professional_fees",
+      "label": "Legal, management and other professional fees",
+      "kind": "expense",
+      "amount": "216.00"
+    },
+    {
+      "category": "cost_of_services",
+      "label": "Cost of services provided, including wages",
+      "kind": "expense",
+      "amount": "0.00"
+    },
+    {
+      "category": "travel_costs",
+      "label": "Travel costs",
+      "kind": "expense",
+      "amount": "0.00"
+    },
+    {
+      "category": "other_expenses",
+      "label": "Other allowable property expenses",
+      "kind": "expense",
+      "amount": "0.00"
+    },
+    {
+      "category": "residential_finance_costs",
+      "label": "Residential property finance costs",
+      "kind": "expense",
+      "amount": "1470.00"
+    }
+  ],
+  "properties": [
+    {
+      "property_id": "00000002-0000-0000-0000-000000000001",
+      "nickname": "Elm Court",
+      "ownership_percentage": "100.00",
+      "is_archived": false,
+      "transaction_count": 7,
+      "totals": {
+        "income": "3600.00",
+        "expenses": "380.00",
+        "residential_finance_costs": "1470.00",
+        "profit": "3220.00"
+      }
+    },
+    {
+      "property_id": "00000002-0000-0000-0000-000000000002",
+      "nickname": "Oak Road",
+      "ownership_percentage": "50.00",
+      "is_archived": false,
+      "transaction_count": 6,
+      "totals": {
+        "income": "2400.00",
+        "expenses": "216.00",
+        "residential_finance_costs": "0.00",
+        "profit": "2184.00"
+      }
+    }
+  ]
+}

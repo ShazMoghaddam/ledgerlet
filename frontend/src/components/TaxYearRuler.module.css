@@ -1,0 +1,138 @@
+/*
+ * The tax year as a ruler: twelve months from April, four quarter segments, and a
+ * marker for today. The drawing is decorative; the list under it says the same in words.
+ */
+.ruler {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: 1.5rem; /* room for the today label above the track */
+}
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin-top: -2px;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.labels .short {
+  display: none;
+}
+
+/* Phone: "Q2" and the state, without the dates (the headline gives the one that matters). */
+@media (max-width: 767px) {
+  .labels .long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .labels .short {
+    display: inline;
+  }
+  .detail {
+    display: none;
+  }
+}
+
+.track {
+  position: relative;
+  height: 14px;
+}
+
+.segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* 3px of paper between segments */
+  border-right: 3px solid var(--color-paper);
+}
+
+.sent {
+  background: var(--color-ink);
+}
+.ready {
+  background: var(--color-ledger);
+}
+.overdue {
+  background: var(--color-amber);
+}
+.in_progress {
+  background: var(--color-paper);
+  box-shadow: inset 0 0 0 1.5px var(--color-ledger);
+}
+.not_started {
+  background: var(--color-paper);
+  box-shadow: inset 0 0 0 1px #9aa9ac;
+}
+
+.progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--color-ledger);
+}
+
+.today {
+  position: absolute;
+  top: -1.5rem;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--color-ink);
+}
+
+.todayLabel {
+  position: absolute;
+  top: -4px;
+  left: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Near the right-hand end, put the label on the other side of the line. */
+.todayLabelLeft {
+  left: auto;
+  right: 8px;
+}
+
+.labels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-caption);
+  line-height: 1.4;
+}
+
+.labels strong {
+  display: block;
+  font-weight: 600;
+}
+
+.labelReady,
+.labelReady strong {
+  color: var(--color-ledger);
+}
+
+.labelOverdue,
+.labelOverdue strong {
+  color: var(--color-amber);
+}
+
+.muted {
+  color: var(--color-slate);
+}
+
+.state {
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .labels {
+    font-size: var(--text-small);
+  }
+}

@@ -1,0 +1,67 @@
+.page {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: var(--space-5);
+  background: var(--color-shelf);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-5);
+  width: min(100%, 35rem);
+  padding: var(--space-6);
+  background: var(--color-paper);
+  border-radius: var(--radius-sheet);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.card h1 {
+  font-size: var(--text-title);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+}
+
+.hint code {
+  font-size: 0.8125rem;
+  word-break: break-all;
+}
+
+.field textarea {
+  min-height: 7rem;
+  padding: var(--space-3);
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.8125rem;
+  resize: vertical;
+}
+
+.error {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.field textarea[aria-invalid="true"] {
+  border: 2px solid var(--color-red);
+}
