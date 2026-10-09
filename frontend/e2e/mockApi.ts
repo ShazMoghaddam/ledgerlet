@@ -10,6 +10,7 @@ import summaryQ3 from "../src/test/fixtures/summary-q3.json" with { type: "json"
 import recent from "../src/test/fixtures/transactions-recent.json" with { type: "json" };
 import page1 from "../src/test/fixtures/transactions-page-1.json" with { type: "json" };
 import boiler from "../src/test/fixtures/transaction-boiler.json" with { type: "json" };
+import importPreview from "../src/test/fixtures/import-preview.json" with { type: "json" };
 
 const connection = {
   connected: true,
@@ -46,6 +47,14 @@ export async function asSampleLandlord(page: Page) {
     const url = new URL(route.request().url());
     const path = url.pathname.replace("/api/v1", "");
     const json = (body: unknown) => route.fulfill({ json: body });
+    if (path.endsWith("/imports/preview")) return json(importPreview);
+    if (path.endsWith("/imports/confirm")) {
+      const rows = (route.request().postDataJSON() as { rows: { fingerprint: string }[] }).rows;
+      return route.fulfill({
+        status: 201,
+        json: { created: rows.length, skipped_already_imported: 0, transaction_ids: [] },
+      });
+    }
     switch (path) {
       case "/me":
         return json(me);

@@ -67,6 +67,8 @@ class PreviewRow(BaseModel):
     amount: Decimal | None
     direction: Direction | None
     suggested_kind: TransactionKind | None
+    # How the landlord categorised the same description last time, for this property.
+    suggested_category: TransactionCategory | None = None
     fingerprint: str | None
 
 

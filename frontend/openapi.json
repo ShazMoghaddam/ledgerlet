@@ -2569,6 +2569,16 @@
               }
             ]
           },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TransactionCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "fingerprint": {
             "anyOf": [
               {
