@@ -8,6 +8,8 @@ import { OverviewPage } from "../features/overview/OverviewPage";
 import { EditTransactionPage, NewTransactionPage } from "../features/transactions/TransactionForm";
 import { TransactionsPage } from "../features/transactions/TransactionsPage";
 import { NotFoundPage, SectionPlaceholder } from "../features/placeholder/SectionPlaceholder";
+import { QuarterPage } from "../features/tax/QuarterPage";
+import { TaxYearPage } from "../features/tax/TaxYearPage";
 
 const soon = "This screen is being built and arrives in the next update.";
 
@@ -26,7 +28,9 @@ export const routes: RouteObject[] = [
           { path: "transactions/:id/edit", element: <EditTransactionPage /> },
           { path: "transactions/new", element: <NewTransactionPage /> },
           { path: "transactions/import", element: <ImportPage /> },
-          { path: "tax", element: <SectionPlaceholder title="Tax" description={soon} /> },
+          { path: "tax", element: <TaxYearPage /> },
+          { path: "tax/:year", element: <TaxYearPage /> },
+          { path: "tax/:year/:quarter", element: <QuarterPage /> },
           {
             path: "tax/:year/:quarter/submit",
             element: <SectionPlaceholder title="Review and submit" description={soon} />,

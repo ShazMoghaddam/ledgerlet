@@ -99,7 +99,81 @@
         "expenses": "1336.40",
         "residential_finance_costs": "2940.00",
         "profit": "5863.60"
-      }
+      },
+      "categories": [
+        {
+          "category": "rental_income",
+          "label": "Rental income",
+          "kind": "income",
+          "amount": "7200.00"
+        },
+        {
+          "category": "lease_premium",
+          "label": "Premiums for the grant of a lease",
+          "kind": "income",
+          "amount": "0.00"
+        },
+        {
+          "category": "reverse_premium",
+          "label": "Reverse premiums and inducements",
+          "kind": "income",
+          "amount": "0.00"
+        },
+        {
+          "category": "other_income",
+          "label": "Other property income",
+          "kind": "income",
+          "amount": "0.00"
+        },
+        {
+          "category": "premises_running_costs",
+          "label": "Rent, rates, insurance and ground rent",
+          "kind": "expense",
+          "amount": "312.40"
+        },
+        {
+          "category": "repairs_and_maintenance",
+          "label": "Repairs and maintenance",
+          "kind": "expense",
+          "amount": "592.00"
+        },
+        {
+          "category": "non_residential_finance_costs",
+          "label": "Non-residential property finance costs",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "professional_fees",
+          "label": "Legal, management and other professional fees",
+          "kind": "expense",
+          "amount": "432.00"
+        },
+        {
+          "category": "cost_of_services",
+          "label": "Cost of services provided, including wages",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "travel_costs",
+          "label": "Travel costs",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "other_expenses",
+          "label": "Other allowable property expenses",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "residential_finance_costs",
+          "label": "Residential property finance costs",
+          "kind": "expense",
+          "amount": "2940.00"
+        }
+      ]
     },
     {
       "property_id": "00000002-0000-0000-0000-000000000002",
@@ -112,7 +186,81 @@
         "expenses": "480.00",
         "residential_finance_costs": "0.00",
         "profit": "4320.00"
-      }
+      },
+      "categories": [
+        {
+          "category": "rental_income",
+          "label": "Rental income",
+          "kind": "income",
+          "amount": "4800.00"
+        },
+        {
+          "category": "lease_premium",
+          "label": "Premiums for the grant of a lease",
+          "kind": "income",
+          "amount": "0.00"
+        },
+        {
+          "category": "reverse_premium",
+          "label": "Reverse premiums and inducements",
+          "kind": "income",
+          "amount": "0.00"
+        },
+        {
+          "category": "other_income",
+          "label": "Other property income",
+          "kind": "income",
+          "amount": "0.00"
+        },
+        {
+          "category": "premises_running_costs",
+          "label": "Rent, rates, insurance and ground rent",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "repairs_and_maintenance",
+          "label": "Repairs and maintenance",
+          "kind": "expense",
+          "amount": "48.00"
+        },
+        {
+          "category": "non_residential_finance_costs",
+          "label": "Non-residential property finance costs",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "professional_fees",
+          "label": "Legal, management and other professional fees",
+          "kind": "expense",
+          "amount": "432.00"
+        },
+        {
+          "category": "cost_of_services",
+          "label": "Cost of services provided, including wages",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "travel_costs",
+          "label": "Travel costs",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "other_expenses",
+          "label": "Other allowable property expenses",
+          "kind": "expense",
+          "amount": "0.00"
+        },
+        {
+          "category": "residential_finance_costs",
+          "label": "Residential property finance costs",
+          "kind": "expense",
+          "amount": "0.00"
+        }
+      ]
     }
   ]
 }

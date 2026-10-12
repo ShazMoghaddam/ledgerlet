@@ -10,15 +10,15 @@ import {
   useTaxpayer,
   useTransactions,
 } from "../../api/queries";
-import type { Property, TaxSummary, TransactionItem } from "../../api/types";
+import type { Property, TransactionItem } from "../../api/types";
 import { Amount } from "../../components/Amount";
 import { ButtonLink } from "../../components/Button";
 import { LoadFailed, Loading } from "../../components/QueryState";
+import { Statement, whoseProperties } from "../../components/Statement";
 import { TaxYearRuler } from "../../components/TaxYearRuler";
 import { WIDE, useMediaQuery } from "../../hooks/useMediaQuery";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { daysBetween, formatDayMonth, formatLong, formatShort, ukToday } from "../../lib/dates";
-import { toPence } from "../../lib/money";
 import { ownershipText, ownsAll } from "../../lib/ownership";
 import {
   currentQuarter,
@@ -223,49 +223,9 @@ function YearToDate({
       ) : summary.isError ? (
         <LoadFailed what="your figures" error={summary.error} retry={summary.refetch} />
       ) : (
-        <Statement summary={summary.data} count={count} />
+        <Statement totals={summary.data.totals} whose={whoseProperties(count)} />
       )}
     </section>
-  );
-}
-
-function Statement({ summary, count }: { summary: TaxSummary; count: number }) {
-  const t = summary.totals;
-  const whose =
-    count === 1 ? "your property" : count === 2 ? "both properties" : `all ${count} properties`;
-  return (
-    <>
-      <dl className={`${s.statement} num`}>
-        <div>
-          <dt>Income</dt>
-          <dd>
-            <Amount pounds={t.income} />
-          </dd>
-        </div>
-        <div>
-          <dt>Expenses</dt>
-          <dd>
-            <Amount pounds={t.expenses} />
-          </dd>
-        </div>
-        <div className={s.total}>
-          <dt>Profit</dt>
-          <dd>
-            <Amount pounds={t.profit} />
-          </dd>
-        </div>
-      </dl>
-      <p className={s.note}>
-        Your share across {whose}.
-        {toPence(t.residential_finance_costs) > 0 && (
-          <>
-            {" "}
-            Mortgage interest of <Amount pounds={t.residential_finance_costs} /> is reported
-            separately, because HMRC gives a tax credit for it.
-          </>
-        )}
-      </p>
-    </>
   );
 }
 

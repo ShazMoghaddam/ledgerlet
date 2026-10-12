@@ -811,6 +811,8 @@ export interface components {
             /** Transaction Count */
             transaction_count: number;
             totals: components["schemas"]["Totals"];
+            /** Categories */
+            categories: components["schemas"]["CategoryAmount"][];
         };
         /**
          * PropertyUpdate
