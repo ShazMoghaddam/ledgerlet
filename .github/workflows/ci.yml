@@ -45,9 +45,13 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+          cache-dependency-path: requirements-dev.lock
 
       - name: Install
-        run: python -m pip install -e ".[dev]"
+        # Exact versions from the lock file, so CI tests what will run.
+        run: |
+          python -m pip install -r requirements-dev.lock
+          python -m pip install -e . --no-deps
 
       - name: Lint
         run: ruff check .
@@ -115,10 +119,10 @@ jobs:
           retention-days: 7
 
   contract:
-    # Regenerates, from the backend, what the frontend is built against: the TypeScript
-    # types and the sample-data responses its tests use. Fails if either has changed
-    # without being committed. openapi.json itself isn't compared byte for byte: its
-    # wording varies between pydantic versions without the API changing.
+    # Regenerates, from the backend, what the frontend is built against: the API
+    # description, the TypeScript types, and the sample-data responses its tests use.
+    # Fails if any has changed without being committed. (The backend's versions are
+    # pinned in requirements-dev.lock, so openapi.json comes out the same every time.)
     # If this fails: `python -m scripts.export_frontend_contract`, then in frontend/
     # `npm run api:types`, and commit the result.
     runs-on: ubuntu-latest
@@ -131,6 +135,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+          cache-dependency-path: requirements-dev.lock
 
       - uses: actions/setup-node@v5
         with:
@@ -140,7 +145,8 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip install -e ".[dev]"
+          python -m pip install -r requirements-dev.lock
+          python -m pip install -e . --no-deps
           npm ci --prefix frontend
 
       - name: Export the contract from the backend
@@ -150,4 +156,4 @@ jobs:
         run: npm run api:types --prefix frontend
 
       - name: The frontend is built against the current API
-        run: git diff --exit-code -- frontend/src/api/schema.d.ts frontend/src/test/fixtures
+        run: git diff --exit-code -- frontend/openapi.json frontend/src/api/schema.d.ts frontend/src/test/fixtures

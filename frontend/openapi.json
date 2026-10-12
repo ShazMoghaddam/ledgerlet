@@ -1934,7 +1934,6 @@
           },
           "amount": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Amount"
           }
         },
@@ -2299,8 +2298,7 @@
                 "exclusiveMinimum": 0.0
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)"
+                "type": "string"
               }
             ],
             "title": "Amount"
@@ -2540,8 +2538,7 @@
           "amount": {
             "anyOf": [
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -2655,8 +2652,7 @@
                 "exclusiveMinimum": 0.0
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)"
+                "type": "string"
               }
             ],
             "title": "Ownership Percentage",
@@ -2710,7 +2706,6 @@
           },
           "ownership_percentage": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Ownership Percentage"
           },
           "is_archived": {
@@ -2769,7 +2764,6 @@
           },
           "ownership_percentage": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Ownership Percentage"
           },
           "is_archived": {
@@ -2875,8 +2869,7 @@
                 "exclusiveMinimum": 0.0
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,3}|(?=[\\d.]{1,6}0*$)\\d{0,3}\\.\\d{0,2}0*$)"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -3177,22 +3170,18 @@
         "properties": {
           "income": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Income"
           },
           "expenses": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Expenses"
           },
           "residential_finance_costs": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Residential Finance Costs"
           },
           "profit": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Profit"
           }
         },
@@ -3249,8 +3238,7 @@
                 "exclusiveMinimum": 0.0
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)"
+                "type": "string"
               }
             ],
             "title": "Amount",
@@ -3306,7 +3294,6 @@
           },
           "amount": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Amount"
           },
           "source": {
@@ -3340,7 +3327,6 @@
           },
           "share_amount": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Share Amount"
           }
         },
@@ -3386,12 +3372,10 @@
           },
           "money_in": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Money In"
           },
           "money_out": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Money Out"
           }
         },
@@ -3436,7 +3420,6 @@
           },
           "amount": {
             "type": "string",
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Amount"
           },
           "source": {
@@ -3540,8 +3523,7 @@
                 "exclusiveMinimum": 0.0
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,10}|(?=[\\d.]{1,13}0*$)\\d{0,10}\\.\\d{0,2}0*$)"
+                "type": "string"
               },
               {
                 "type": "null"

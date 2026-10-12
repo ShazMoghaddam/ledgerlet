@@ -116,6 +116,21 @@ the HTTP error mapping, and sign-in token verification).
 
 - Which identity provider to use in production (decided with the frontend)
 
+## Dependencies
+
+`pyproject.toml` says which packages LedgerLet needs and the oldest versions it works
+with. `requirements.lock` (to run it) and `requirements-dev.lock` (to develop and test)
+pin the exact version of every package, including indirect ones, so every install, CI
+run and deployment uses the same code. To update them, deliberately:
+
+```bash
+uv pip compile pyproject.toml --universal --python-version 3.11 -o requirements.lock
+uv pip compile pyproject.toml --extra dev --universal --python-version 3.11 -o requirements-dev.lock
+pip install -r requirements-dev.lock && python -m pytest
+```
+
+Then regenerate the frontend contract (see below) and commit everything together.
+
 ## Running locally (macOS)
 
 Needs Python 3.11+ and Docker Desktop.
@@ -123,7 +138,8 @@ Needs Python 3.11+ and Docker Desktop.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -r requirements-dev.lock   # exact versions, the same as CI
+pip install -e . --no-deps
 
 cp .env.example .env
 docker compose up -d db
