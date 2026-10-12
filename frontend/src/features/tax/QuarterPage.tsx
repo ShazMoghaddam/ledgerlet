@@ -1,17 +1,10 @@
 import type { ReactNode } from "react";
 import { Link, useParams } from "react-router";
 
-import {
-  useHmrcConnection,
-  useObligations,
-  useSubmissions,
-  useSummary,
-  useTaxpayer,
-} from "../../api/queries";
+import { useObligations, useSubmissions, useSummary } from "../../api/queries";
 import type { CategoryAmount, PropertySummary, Submission, TaxSummary } from "../../api/types";
 import { Amount } from "../../components/Amount";
 import { ButtonLink } from "../../components/Button";
-import { AlertIcon, CheckIcon } from "../../components/Icons";
 import { LoadFailed, Loading } from "../../components/QueryState";
 import { whoseProperties } from "../../components/Statement";
 import { WIDE, useMediaQuery } from "../../hooks/useMediaQuery";
@@ -25,12 +18,15 @@ import {
   FIRST_TAX_YEAR,
   parseTaxPath,
   quarterPath,
+  receiptPath,
   submitPath,
   taxYearLabel,
   taxYearOf,
   taxYearPath,
 } from "../../lib/taxYear";
 import { NotFoundPage } from "../placeholder/SectionPlaceholder";
+import { Checklist } from "./Checklist";
+import { hmrcSettingsPath, useReadiness } from "./readiness";
 import s from "./Tax.module.css";
 
 const FINANCE = "residential_finance_costs";
@@ -154,11 +150,9 @@ function SendPanel({
   retrySubmissions: () => void;
   today: string;
 }) {
-  const connection = useHmrcConnection();
-  const connected = connection.data?.connected === true;
-  const taxpayer = useTaxpayer(connected);
-  const ended = today > q.windowEnd;
+  const { checks, blocker } = useReadiness(q, earlier, today);
   const state = q.state.kind;
+  const here = quarterPath(year, q.quarter);
 
   if (state === "not_started" || state === "in_progress")
     return (
@@ -190,40 +184,6 @@ function SendPanel({
     );
   if (!submissions) return <Loading label="what you’ve sent to HMRC" />;
 
-  const business = taxpayer.data?.nino && taxpayer.data.uk_property_business_id;
-  const canSend = ended && connected && Boolean(business);
-
-  const checks: Check[] = [
-    { ok: ended, text: `Quarter ended ${formatShort(q.windowEnd)}` },
-    connection.isPending
-      ? { ok: undefined, text: "Checking your HMRC connection…" }
-      : connection.isError
-        ? { ok: false, text: "Couldn’t check your HMRC connection" }
-        : connected
-          ? { ok: true, text: "Connected to HMRC" }
-          : { ok: false, text: "Not connected to HMRC" },
-  ];
-  if (connected)
-    checks.push(
-      taxpayer.isPending
-        ? { ok: undefined, text: "Finding your details at HMRC…" }
-        : taxpayer.isError
-          ? { ok: false, text: "Couldn’t find your details at HMRC" }
-          : business
-            ? { ok: true, text: "National Insurance number and property business found" }
-            : { ok: false, text: "No UK property business found at HMRC" },
-    );
-  const unsent = earlier.filter((x) => x.state.kind !== "sent");
-  if (earlier.length > 0)
-    checks.push(
-      unsent.length === 0
-        ? { ok: true, text: `${quarterNames(earlier)} already sent` }
-        : {
-            ok: undefined,
-            text: `${quarterNames(unsent)} ${unsent.length === 1 ? "wasn’t" : "weren’t"} sent. This update covers ${unsent.length === 1 ? "it" : "them"} too.`,
-          },
-    );
-
   const sent = state === "sent" ? sentDetails(q, submissions) : undefined;
 
   return (
@@ -238,44 +198,40 @@ function SendPanel({
         </p>
       )}
       {sent && (
-        <dl className={s.facts}>
-          <dt>Sent</dt>
-          <dd>
-            {formatLong(sent.submission.submitted_at.slice(0, 10))}
-            {sent.via !== q.quarter && <>, in the quarter {sent.via} update</>}
-          </dd>
-          {sent.submission.hmrc_correlation_id && (
-            <>
-              <dt>HMRC reference</dt>
-              <dd className={s.reference}>{sent.submission.hmrc_correlation_id}</dd>
-            </>
-          )}
-        </dl>
-      )}
-      <ul className={s.checks}>
-        {checks.map((c) => (
-          <li key={c.text} className={c.ok === false ? s.checkBad : undefined}>
-            {c.ok === true ? (
-              <CheckIcon size={18} />
-            ) : c.ok === false ? (
-              <AlertIcon size={18} />
-            ) : (
-              <span className={s.checkNeutral} aria-hidden="true" />
+        <>
+          <dl className={s.facts}>
+            <dt>Sent</dt>
+            <dd>
+              {formatLong(sent.submission.submitted_at.slice(0, 10))}
+              {sent.via !== q.quarter && <>, in the quarter {sent.via} update</>}
+            </dd>
+            {sent.submission.hmrc_correlation_id && (
+              <>
+                <dt>HMRC reference</dt>
+                <dd className={s.reference}>{sent.submission.hmrc_correlation_id}</dd>
+              </>
             )}
-            {c.text}
-          </li>
-        ))}
-      </ul>
+          </dl>
+          <Link className={s.strong} to={receiptPath(year, sent.via, sent.submission.id)}>
+            See the receipt
+          </Link>
+        </>
+      )}
+      <Checklist checks={checks} />
 
-      {connection.isSuccess && !connected ? (
-        <ButtonLink to="/settings/hmrc" size="large" block>
+      {blocker === "connect" ? (
+        <ButtonLink to={hmrcSettingsPath(here)} size="large" block>
           Connect to HMRC
         </ButtonLink>
-      ) : canSend && state !== "sent" ? (
+      ) : blocker === "details" ? (
+        <ButtonLink to={hmrcSettingsPath(here)} size="large" block>
+          Add your HMRC details
+        </ButtonLink>
+      ) : blocker === undefined && state !== "sent" ? (
         <ButtonLink to={submitPath(year, q.quarter)} size="large" block>
           Review and submit
         </ButtonLink>
-      ) : canSend && state === "sent" ? (
+      ) : blocker === undefined && state === "sent" ? (
         <ButtonLink to={submitPath(year, q.quarter)} variant="secondary" block>
           Send again with updated figures
         </ButtonLink>
@@ -286,18 +242,6 @@ function SendPanel({
       </p>
     </>
   );
-}
-
-interface Check {
-  ok: boolean | undefined; // undefined: neither done nor a problem
-  text: string;
-}
-
-/** "Quarter 1", "Quarters 1 and 2", "Quarters 1, 2 and 3". */
-function quarterNames(quarters: Quarter[]): string {
-  const n = quarters.map((x) => x.quarter);
-  if (n.length === 1) return `Quarter ${n[0]}`;
-  return `Quarters ${n.slice(0, -1).join(", ")} and ${n[n.length - 1]}`;
 }
 
 /** The accepted submission that covered this quarter: its own if there is one, latest first. */

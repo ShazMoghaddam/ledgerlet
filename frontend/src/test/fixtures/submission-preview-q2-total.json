@@ -1,0 +1,22 @@
+{
+  "tax_year_label": "2026-27",
+  "quarter": 2,
+  "period_start": "2026-04-06",
+  "period_end": "2026-10-05",
+  "body": {
+    "fromDate": "2026-04-06",
+    "toDate": "2026-10-05",
+    "ukProperty": {
+      "income": {
+        "periodAmount": 12000.0,
+        "premiumsOfLeaseGrant": 0.0,
+        "reversePremiums": 0.0,
+        "otherIncome": 0.0
+      },
+      "expenses": {
+        "consolidatedExpenses": 1816.4,
+        "residentialFinancialCost": 2940.0
+      }
+    }
+  }
+}

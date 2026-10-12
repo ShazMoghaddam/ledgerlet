@@ -3,6 +3,9 @@ import type { RouteObject } from "react-router";
 import { RequireSignIn } from "../auth/RequireSignIn";
 import { AppShell } from "../components/AppShell";
 import { SignInPage } from "../features/auth/SignInPage";
+import { HmrcSettingsPage } from "../features/hmrc/HmrcSettingsPage";
+import { ReceiptPage } from "../features/hmrc/ReceiptPage";
+import { SubmitPage } from "../features/hmrc/SubmitPage";
 import { ImportPage } from "../features/import/ImportPage";
 import { OverviewPage } from "../features/overview/OverviewPage";
 import { EditTransactionPage, NewTransactionPage } from "../features/transactions/TransactionForm";
@@ -31,10 +34,8 @@ export const routes: RouteObject[] = [
           { path: "tax", element: <TaxYearPage /> },
           { path: "tax/:year", element: <TaxYearPage /> },
           { path: "tax/:year/:quarter", element: <QuarterPage /> },
-          {
-            path: "tax/:year/:quarter/submit",
-            element: <SectionPlaceholder title="Review and submit" description={soon} />,
-          },
+          { path: "tax/:year/:quarter/submit/:step?", element: <SubmitPage /> },
+          { path: "tax/:year/:quarter/receipt/:id", element: <ReceiptPage /> },
           {
             path: "properties",
             element: <SectionPlaceholder title="Properties" description={soon} />,
@@ -51,10 +52,7 @@ export const routes: RouteObject[] = [
             path: "settings",
             element: <SectionPlaceholder title="Settings" description={soon} showSignOut />,
           },
-          {
-            path: "settings/hmrc",
-            element: <SectionPlaceholder title="HMRC connection" description={soon} />,
-          },
+          { path: "settings/hmrc", element: <HmrcSettingsPage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

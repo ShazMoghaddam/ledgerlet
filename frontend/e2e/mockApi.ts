@@ -11,6 +11,8 @@ import recent from "../src/test/fixtures/transactions-recent.json" with { type: 
 import page1 from "../src/test/fixtures/transactions-page-1.json" with { type: "json" };
 import boiler from "../src/test/fixtures/transaction-boiler.json" with { type: "json" };
 import importPreview from "../src/test/fixtures/import-preview.json" with { type: "json" };
+import previewQ2 from "../src/test/fixtures/submission-preview-q2.json" with { type: "json" };
+import previewQ2Total from "../src/test/fixtures/submission-preview-q2-total.json" with { type: "json" };
 
 const connection = {
   connected: true,
@@ -19,7 +21,7 @@ const connection = {
   scope: "read:self-assessment write:self-assessment",
 };
 const taxpayer = { nino: "OE****77A", uk_property_business_id: "XDIS36257256364" };
-const submissions = [
+const submissions: Record<string, unknown>[] = [
   {
     id: "00000004-0000-0000-0000-000000000001",
     business_id: "XDIS36257256364",
@@ -41,6 +43,7 @@ const summaries: Record<string, unknown> = { "1": summaryQ1, "2": summaryQ2, "3"
 
 /** Sign in, fix the date at 9 October 2026, and answer the API as the sample landlord. */
 export async function asSampleLandlord(page: Page) {
+  const sent: Record<string, unknown>[] = []; // updates sent during this test
   await page.clock.setFixedTime(new Date("2026-10-09T10:00:00Z"));
   await page.addInitScript(() => sessionStorage.setItem("ledgerlet.token", "aaa.bbb.ccc"));
   await page.route("**/api/v1/**", async (route) => {
@@ -48,6 +51,24 @@ export async function asSampleLandlord(page: Page) {
     const path = url.pathname.replace("/api/v1", "");
     const json = (body: unknown) => route.fulfill({ json: body });
     if (path.endsWith("/imports/preview")) return json(importPreview);
+    const method = route.request().method();
+    if (path === "/hmrc/submissions/preview") {
+      const body = route.request().postDataJSON() as { consolidated_expenses?: boolean };
+      return json(body.consolidated_expenses ? previewQ2Total : previewQ2);
+    }
+    if (path === "/hmrc/submissions" && method === "POST") {
+      const accepted = {
+        ...submissions[0],
+        id: "00000004-0000-0000-0000-000000000002",
+        quarter: 2,
+        period_end: "2026-10-05",
+        hmrc_correlation_id: "914a411c-ed26-4089-84cd-4bc7737d13ba",
+        submitted_at: "2026-10-09T09:42:00Z",
+        request_body: previewQ2.body,
+      };
+      sent.push(accepted);
+      return route.fulfill({ status: 201, json: accepted });
+    }
     if (path.endsWith("/imports/confirm")) {
       const rows = (route.request().postDataJSON() as { rows: { fingerprint: string }[] }).rows;
       return route.fulfill({
@@ -73,7 +94,7 @@ export async function asSampleLandlord(page: Page) {
       case "/hmrc/taxpayer":
         return json(taxpayer);
       case "/hmrc/submissions":
-        return json(submissions);
+        return json([...submissions, ...sent]);
       default:
         if (path === `/transactions/${boiler.id}`) return json(boiler);
         return route.fulfill({ status: 404, json: { detail: `No mock for ${path}` } });

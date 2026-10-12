@@ -1,0 +1,89 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  max-width: 44rem;
+}
+
+.page h1 {
+  font-size: var(--text-title);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1.5px solid var(--color-rule-strong);
+}
+
+.section h2 {
+  font-size: var(--text-section);
+}
+
+.prose {
+  max-width: 40rem;
+  text-wrap: pretty;
+}
+
+.muted {
+  color: var(--color-slate);
+}
+
+.problem {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-red);
+  background: var(--color-red-tint);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-5);
+}
+
+.facts dt {
+  color: var(--color-slate);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.detail {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.detail h3 {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.valueRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+}
+
+.inlineForm,
+.find {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ninoInput {
+  max-width: 14rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

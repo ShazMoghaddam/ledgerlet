@@ -130,7 +130,7 @@ describe("Quarter", () => {
     expect(await within(panel).findByText("Not connected to HMRC")).toBeInTheDocument();
     expect(within(panel).getByRole("link", { name: "Connect to HMRC" })).toHaveAttribute(
       "href",
-      "/settings/hmrc",
+      "/settings/hmrc?next=%2Ftax%2F2026%2Fq2",
     );
     expect(within(panel).queryByRole("link", { name: "Review and submit" })).toBeNull();
   });

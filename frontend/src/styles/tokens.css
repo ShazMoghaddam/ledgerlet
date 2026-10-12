@@ -20,6 +20,7 @@
   --color-amber: #8a4b00; /* due soon, needs attention (on --color-amber-tint 6.0:1) */
   --color-amber-tint: #fbefd9;
   --color-red: #a1262b; /* errors and destructive actions only (7.3:1) */
+  --color-red-tint: #fbeceb; /* behind an error message (ink on it 12.9:1) */
   --color-disabled-bg: #e4e9e8;
   --color-disabled-text: #5d6e72;
   --color-focus: var(--color-ink);

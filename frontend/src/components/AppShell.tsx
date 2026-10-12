@@ -100,6 +100,10 @@ function NavFooter({ yearLabel }: { yearLabel: string }) {
  * After moving to another page, put keyboard and screen reader focus on its
  * heading, so the change is announced and Tab starts from the top of the page.
  * Not on first load: the browser handles that.
+ *
+ * A page that's still loading may show a stand-in heading that's then replaced.
+ * Focus would fall back to the page body, so until the person does something
+ * themselves, focus follows the heading to its replacement.
  */
 function useFocusHeadingOnNavigate() {
   const { pathname, state } = useLocation();
@@ -113,8 +117,27 @@ function useFocusHeadingOnNavigate() {
         document.getElementById("main")?.focus();
       return;
     }
-    const heading = document.getElementById("page-heading") ?? document.getElementById("main");
-    heading?.focus();
+    const focusHeading = () =>
+      (document.getElementById("page-heading") ?? document.getElementById("main"))?.focus();
+    focusHeading();
+
+    const main = document.getElementById("main");
+    if (!main) return;
+    const follow = new MutationObserver(() => {
+      const lost = document.activeElement === null || document.activeElement === document.body;
+      if (lost && document.getElementById("page-heading")) focusHeading();
+    });
+    follow.observe(main, { childList: true, subtree: true });
+    const stop = () => follow.disconnect();
+    const timer = window.setTimeout(stop, 10_000);
+    window.addEventListener("pointerdown", stop, { once: true });
+    window.addEventListener("keydown", stop, { once: true });
+    return () => {
+      stop();
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", stop);
+      window.removeEventListener("keydown", stop);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only on page changes
   }, [pathname]);
 }

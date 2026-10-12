@@ -29,3 +29,5 @@ export const taxYearPath = (year: number, today: IsoDate) =>
   year === taxYearOf(today) ? "/tax" : `/tax/${year}`;
 export const quarterPath = (year: number, quarter: number) => `/tax/${year}/q${quarter}`;
 export const submitPath = (year: number, quarter: number) => `/tax/${year}/q${quarter}/submit`;
+export const receiptPath = (year: number, quarter: number, submissionId: string) =>
+  `/tax/${year}/q${quarter}/receipt/${submissionId}`;
