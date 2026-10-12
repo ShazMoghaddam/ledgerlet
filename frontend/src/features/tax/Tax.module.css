@@ -314,6 +314,10 @@ a.quarterRow .quarterName {
   background: var(--color-slate);
 }
 
+.strong {
+  font-weight: 600;
+}
+
 .facts {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

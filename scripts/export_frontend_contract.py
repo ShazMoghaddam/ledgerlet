@@ -28,6 +28,9 @@ from sqlalchemy.pool import StaticPool
 import app.models  # noqa: F401  (registers every table)
 from app.core.database import Base, get_db
 from app.main import create_app
+from app.modules.hmrc.dependencies import get_submission_service
+from app.modules.hmrc.repository import HmrcSubmissionRepository
+from app.modules.hmrc.submission import HmrcSubmissionService
 from app.modules.imports.dependencies import get_import_service
 from app.modules.imports.service import ImportService
 from app.modules.landlords.dependencies import get_current_landlord
@@ -87,6 +90,19 @@ def main() -> None:
 
     api.dependency_overrides[get_import_service] = import_service
 
+    # Previews never reach HMRC, so the HMRC parts are left out (None).
+    def submission_service(properties: PropertyServiceDep, transactions: TransactionServiceDep):
+        return HmrcSubmissionService(
+            HmrcSubmissionRepository(session),
+            tax_service(properties, transactions),
+            None,  # type: ignore[arg-type]
+            None,  # type: ignore[arg-type]
+            None,  # type: ignore[arg-type]
+            today=_fixed_today,
+        )
+
+    api.dependency_overrides[get_submission_service] = submission_service
+
     ROOT.joinpath("openapi.json").write_text(json.dumps(api.openapi(), indent=2) + "\n")
     FIXTURES.mkdir(parents=True, exist_ok=True)
     with TestClient(api) as client:
@@ -113,7 +129,18 @@ def main() -> None:
         resp.raise_for_status()
         text = json.dumps(resp.json(), indent=2) + "\n"
         FIXTURES.joinpath("import-preview.json").write_text(_apply(text, ids))
-    print(f"Wrote openapi.json and {len(RESPONSES) + 2} fixtures under {ROOT}")
+
+        # Exactly what quarter 2 would send HMRC, expenses by category and as one total.
+        for name, consolidated in (("", False), ("-total", True)):
+            resp = client.post(
+                "/api/v1/hmrc/submissions/preview",
+                json={"tax_year": 2026, "quarter": 2, "consolidated_expenses": consolidated},
+            )
+            resp.raise_for_status()
+            FIXTURES.joinpath(f"submission-preview-q2{name}.json").write_text(
+                json.dumps(resp.json(), indent=2) + "\n"
+            )
+    print(f"Wrote openapi.json and {len(RESPONSES) + 4} fixtures under {ROOT}")
 
 
 def _stabilise(session: Session) -> dict[str, str]:

@@ -271,3 +271,23 @@
     margin-inline: auto;
   }
 }
+
+/* Printing (a submission receipt, say): just the page, without the app around it. */
+@media print {
+  .skip,
+  .topbar,
+  .nav {
+    display: none !important;
+  }
+
+  .shell {
+    display: block !important;
+  }
+
+  .main,
+  .content {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}
