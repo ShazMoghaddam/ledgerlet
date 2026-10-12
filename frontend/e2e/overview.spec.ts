@@ -86,3 +86,25 @@ test("sign-in page is accessible too", async ({ page, context }) => {
     .analyze();
   expect(results.violations.map((v) => v.id)).toEqual([]);
 });
+
+for (const path of ["/privacy", "/terms"]) {
+  test(`${path} is public, readable and accessible`, async ({ page, context }) => {
+    await context.clearCookies();
+    await page.addInitScript(() => sessionStorage.clear());
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBe(0);
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(results.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`)).toEqual([]);
+    if (process.env.SHOTS)
+      await page.screenshot({
+        path: `${process.env.SHOTS}/legal${path.replace("/", "-")}-${test.info().project.name}.png`,
+        fullPage: true,
+      });
+  });
+}

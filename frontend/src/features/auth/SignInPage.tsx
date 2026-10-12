@@ -5,6 +5,7 @@ import { signIn } from "../../auth/session";
 import { safeNext, useToken } from "../../auth/useSession";
 import { Button } from "../../components/Button";
 import { Mark } from "../../components/Mark";
+import { LegalFooter } from "../legal/LegalPage";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import s from "./SignInPage.module.css";
 
@@ -33,13 +34,7 @@ export function SignInPage() {
         </h1>
         {import.meta.env.DEV ? <DevTokenForm next={next} /> : <p>Sign-in isn’t available yet.</p>}
       </div>
-      <footer className={s.footer}>
-        © 2026 LedgerLet. Built in London by{" "}
-        <a href="https://shazmoghaddam.github.io/" rel="author">
-          Shaz Moghaddam
-        </a>
-        .
-      </footer>
+      <LegalFooter />
     </main>
   );
 }
