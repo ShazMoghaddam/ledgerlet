@@ -24,7 +24,7 @@ import {
   taxYearOf,
   taxYearPath,
 } from "../../lib/taxYear";
-import { NotFoundPage } from "../placeholder/SectionPlaceholder";
+import { NotFoundPage } from "../notFound/NotFoundPage";
 import { Checklist } from "./Checklist";
 import { hmrcSettingsPath, useReadiness } from "./readiness";
 import s from "./Tax.module.css";

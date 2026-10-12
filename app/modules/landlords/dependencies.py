@@ -34,6 +34,24 @@ def get_landlord_service(db: Annotated[Session, Depends(get_db)]) -> LandlordSer
 LandlordServiceDep = Annotated[LandlordService, Depends(get_landlord_service)]
 
 
+def get_settings_service(db: Annotated[Session, Depends(get_db)]) -> LandlordService:
+    """For changing settings, which needs to know what's been sent to HMRC."""
+    # Imported here: the HMRC module depends on this one for the signed-in landlord.
+    from app.core.time import uk_today
+    from app.modules.hmrc.repository import HmrcSubmissionRepository
+    from app.modules.tax.periods import tax_year_containing
+
+    def sent_this_tax_year(landlord_id: UUID) -> bool:
+        year = tax_year_containing(uk_today())
+        submissions = HmrcSubmissionRepository(db).list_for_landlord(landlord_id, year)
+        return any(s.succeeded for s in submissions)
+
+    return LandlordService(LandlordRepository(db), sent_this_tax_year)
+
+
+SettingsServiceDep = Annotated[LandlordService, Depends(get_settings_service)]
+
+
 def get_current_landlord(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
     verifier: Annotated[TokenVerifier, Depends(get_token_verifier)],

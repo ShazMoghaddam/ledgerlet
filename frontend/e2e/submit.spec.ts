@@ -68,3 +68,11 @@ test("the HMRC connection page", async ({ page }, { project }) => {
   await expect(page).toHaveURL(/\/settings\/hmrc$/);
   await checkPage(page, "hmrc-settings", project.name);
 });
+
+test("the settings page", async ({ page }, { project }) => {
+  await page.goto("/settings");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Settings");
+  await expect(page.getByText(/already sent HMRC an update for 2026-27/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Shaz Moghaddam" })).toBeVisible();
+  await checkPage(page, "settings", project.name);
+});

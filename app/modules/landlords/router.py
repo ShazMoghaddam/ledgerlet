@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.modules.landlords.dependencies import CurrentLandlord, LandlordServiceDep
+from app.modules.landlords.dependencies import CurrentLandlord, SettingsServiceDep
 from app.modules.landlords.schemas import LandlordRead, LandlordUpdate
 
 router = APIRouter(prefix="/me", tags=["me"])
@@ -14,5 +14,5 @@ def get_me(landlord: CurrentLandlord):
 
 
 @router.patch("", response_model=LandlordRead)
-def update_me(payload: LandlordUpdate, landlord: CurrentLandlord, service: LandlordServiceDep):
+def update_me(payload: LandlordUpdate, landlord: CurrentLandlord, service: SettingsServiceDep):
     return service.update_profile(landlord, payload)
