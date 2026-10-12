@@ -9,7 +9,9 @@ import type { TransactionCategory } from "./types";
 
 export const keys = {
   me: ["me"] as const,
-  properties: ["properties"] as const,
+  properties: ["properties"] as const, // active ones; also the prefix for every property query
+  allProperties: ["properties", "all"] as const,
+  property: (id: string) => ["properties", "one", id] as const,
   obligations: (taxYear?: number) => ["tax", "obligations", taxYear ?? "current"] as const,
   summary: (taxYear: number, quarter: number) => ["tax", "summary", taxYear, quarter] as const,
   transactions: (params: TransactionParams) => ["transactions", "list", params] as const,
@@ -37,6 +39,28 @@ export const useProperties = () =>
   useQuery({
     queryKey: keys.properties,
     queryFn: async () => unwrap(await api.GET("/api/v1/properties")),
+  });
+
+/** Including archived ones, for the Properties screen. */
+export const useAllProperties = () =>
+  useQuery({
+    queryKey: keys.allProperties,
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/properties", { params: { query: { include_archived: true } } }),
+      ),
+  });
+
+export const useProperty = (id: string | undefined) =>
+  useQuery({
+    queryKey: keys.property(id ?? ""),
+    enabled: id !== undefined,
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/properties/{property_id}", {
+          params: { path: { property_id: id ?? "" } },
+        }),
+      ),
   });
 
 export const useObligations = (taxYear?: number) =>

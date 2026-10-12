@@ -7,7 +7,7 @@ import { Button, ButtonLink } from "../../components/Button";
 import { CheckIcon } from "../../components/Icons";
 import { LoadFailed, Loading } from "../../components/QueryState";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { formatLong, formatShort, ukToday } from "../../lib/dates";
+import { formatDayMonth, formatLong, formatShort, ukToday } from "../../lib/dates";
 import { formatPence } from "../../lib/money";
 import { quarterStates } from "../../lib/quarters";
 import { parseTaxPath, quarterPath, submitPath } from "../../lib/taxYear";
@@ -79,7 +79,7 @@ function Accepted({ sub, year, today }: { sub: Submission; year: number; today: 
           HMRC has accepted your update
         </h1>
         <p className={s.lead}>
-          Quarter {sub.quarter}, {formatShort(sub.period_start)} to {formatLong(sub.period_end)}.
+          Quarter {sub.quarter}, {formatDayMonth(sub.period_start)} to {formatLong(sub.period_end)}.
           Sent {sentAt(sub)}.
         </p>
       </div>

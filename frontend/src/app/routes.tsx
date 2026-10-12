@@ -11,6 +11,9 @@ import { OverviewPage } from "../features/overview/OverviewPage";
 import { EditTransactionPage, NewTransactionPage } from "../features/transactions/TransactionForm";
 import { TransactionsPage } from "../features/transactions/TransactionsPage";
 import { NotFoundPage, SectionPlaceholder } from "../features/placeholder/SectionPlaceholder";
+import { PropertiesPage } from "../features/properties/PropertiesPage";
+import { EditPropertyPage, NewPropertyPage } from "../features/properties/PropertyForm";
+import { PropertyPage } from "../features/properties/PropertyPage";
 import { QuarterPage } from "../features/tax/QuarterPage";
 import { TaxYearPage } from "../features/tax/TaxYearPage";
 
@@ -36,18 +39,10 @@ export const routes: RouteObject[] = [
           { path: "tax/:year/:quarter", element: <QuarterPage /> },
           { path: "tax/:year/:quarter/submit/:step?", element: <SubmitPage /> },
           { path: "tax/:year/:quarter/receipt/:id", element: <ReceiptPage /> },
-          {
-            path: "properties",
-            element: <SectionPlaceholder title="Properties" description={soon} />,
-          },
-          {
-            path: "properties/new",
-            element: <SectionPlaceholder title="Add a property" description={soon} />,
-          },
-          {
-            path: "properties/:id",
-            element: <SectionPlaceholder title="Property" description={soon} />,
-          },
+          { path: "properties", element: <PropertiesPage /> },
+          { path: "properties/new", element: <NewPropertyPage /> },
+          { path: "properties/:id", element: <PropertyPage /> },
+          { path: "properties/:id/edit", element: <EditPropertyPage /> },
           {
             path: "settings",
             element: <SectionPlaceholder title="Settings" description={soon} showSignOut />,

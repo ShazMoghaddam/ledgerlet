@@ -1,4 +1,10 @@
-import { ownershipText, ownsAll, trimPercentage } from "./ownership";
+import {
+  ownershipText,
+  ownsAll,
+  trimPercentage,
+  looksLikePostcode,
+  parsePercentage,
+} from "./ownership";
 
 it.each([
   ["100.00", "100"],
@@ -16,4 +22,34 @@ it("describes a share in words", () => {
   expect(ownershipText("25.00")).toBe("You own 25%");
   expect(ownsAll("100.00")).toBe(true);
   expect(ownsAll("50.00")).toBe(false);
+});
+
+describe("parsePercentage", () => {
+  it.each([
+    ["50", "50"],
+    ["33.33", "33.33"],
+    ["12.5%", "12.5"],
+    [" 100 ", "100"],
+    ["007", "7"],
+  ])("reads %j exactly as %j", (raw, value) => {
+    expect(parsePercentage(raw)).toEqual({ ok: true, value });
+  });
+
+  it.each([
+    ["", "Enter your share"],
+    ["0", "more than 0%"],
+    ["100.01", "can’t be more than 100%"],
+    ["12.345", "like 50 or 33.33"],
+    ["half", "like 50 or 33.33"],
+  ])("refuses %j", (raw, message) => {
+    const result = parsePercentage(raw);
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.error).toContain(message);
+  });
+});
+
+it("checks postcodes the way the API does", () => {
+  expect(looksLikePostcode("sw1a 1aa")).toBe(true);
+  expect(looksLikePostcode("LS6 2AB")).toBe(true);
+  expect(looksLikePostcode("12345")).toBe(false);
 });
