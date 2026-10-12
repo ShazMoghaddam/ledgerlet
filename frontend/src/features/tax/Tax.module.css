@@ -1,0 +1,501 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.page h1 {
+  font-size: var(--text-title);
+}
+
+.section {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 48rem;
+}
+
+.section h2,
+.figures h2,
+.panel h2 {
+  font-size: var(--text-section);
+}
+
+.section h2.small {
+  font-size: var(--text-body);
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+}
+
+.lead {
+  color: var(--color-slate);
+  font-size: var(--text-lead);
+  max-width: 40rem;
+}
+
+.prose {
+  max-width: 40rem;
+  text-wrap: pretty;
+}
+
+.note {
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+  text-wrap: pretty;
+}
+
+.meta,
+.muted {
+  color: var(--color-slate);
+}
+
+.meta {
+  font-size: var(--text-caption);
+}
+
+.inlineList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.inlineList a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-weight: 600;
+}
+
+/* ---------- Status words ---------- */
+
+.ready,
+.overdue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.ready {
+  color: var(--color-ledger);
+}
+
+.overdue,
+.overdueHeading {
+  color: var(--color-amber);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ---------- Tax year: the four updates ---------- */
+
+.table {
+  width: 100%;
+  font-size: var(--text-small);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  border-bottom: 1px solid var(--color-rule);
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.table thead th {
+  padding-top: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1.5px solid var(--color-rule-strong);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.table tbody th {
+  font-weight: 600;
+}
+
+.table .action {
+  padding-right: 0;
+  text-align: right;
+}
+
+.action a {
+  font-weight: 600;
+}
+
+.quarterList {
+  padding: 0;
+  list-style: none;
+  border-top: 1.5px solid var(--color-rule-strong);
+}
+
+.quarterList li {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.quarterRow {
+  display: grid;
+  gap: 2px var(--space-3);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  min-height: 64px;
+  padding: var(--space-3) 0;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.quarterRow > :nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.quarterRow > :nth-child(3) {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  text-align: right;
+}
+
+a.quarterRow:hover .quarterName {
+  text-decoration: underline;
+}
+
+.quarterName {
+  font-weight: 600;
+}
+
+a.quarterRow .quarterName {
+  color: var(--color-ledger);
+}
+
+.statementWrap {
+  max-width: 32rem;
+}
+
+/* ---------- Quarter ---------- */
+
+.breadcrumb {
+  font-size: var(--text-small);
+  color: var(--color-slate);
+}
+
+.breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-weight: 600;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: calc(-1 * var(--space-5));
+}
+
+.headText {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* A segmented row of links: it changes the page, so links, not tabs. */
+.switcher {
+  display: inline-flex;
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+}
+
+.switcher a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.switcher a + a {
+  border-left: 1px solid var(--color-rule);
+}
+
+.switcher a:hover {
+  background: var(--color-shelf);
+}
+
+.switcher a[aria-current="page"] {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.figures {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* The send panel: a quiet shelf on phones and tablets, a ruled column on laptops. */
+.panel {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-sheet);
+  background: var(--color-shelf);
+}
+
+.checks {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.checks li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.checks svg,
+.checkNeutral {
+  flex: none;
+  margin-top: 3px;
+  color: var(--color-ledger);
+}
+
+.checks .checkBad,
+.checks .checkBad svg {
+  color: var(--color-amber);
+  font-weight: 600;
+}
+
+.checkNeutral {
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.checkNeutral::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-slate);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-small);
+}
+
+.facts dt {
+  color: var(--color-slate);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.reference {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--text-caption);
+  overflow-wrap: anywhere;
+}
+
+/* One column of figures, ruled like the statement on the Overview. */
+.figureList {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.figureList h3,
+.detailsBody h3 {
+  margin-bottom: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+}
+
+.detailsBody h3 {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--text-body);
+  color: var(--color-ink);
+}
+
+.lines > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.lines > div:last-child {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.lines dd {
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.lines > .lineTotal {
+  border-top: 2px solid var(--color-rule-strong);
+  font-weight: 600;
+}
+
+.details {
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.details summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--color-ledger);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detailsBody {
+  display: grid;
+  gap: var(--space-5);
+  padding-bottom: var(--space-4);
+}
+
+/* Category by property. The total column is what HMRC receives, so it reads strongest. */
+.tableScroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.figureTable {
+  width: 100%;
+  font-size: var(--text-small);
+}
+
+.figureTable th,
+.figureTable td {
+  padding: var(--space-3) 0 var(--space-3) var(--space-4);
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.figureTable th:first-child {
+  padding-left: 0;
+}
+
+.figureTable thead th {
+  padding-top: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1.5px solid var(--color-rule-strong);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.figureTable tbody th {
+  font-weight: 400;
+}
+
+.figureTable tbody tr:not(.groupRow) > * {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.figureTable .groupRow th {
+  padding-top: var(--space-5);
+  padding-bottom: var(--space-1);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.figureTable tbody:first-of-type .groupRow th {
+  padding-top: var(--space-3);
+}
+
+.figureTable .totalRow > * {
+  border-top: 2px solid var(--color-rule-strong);
+  font-weight: 600;
+}
+
+.figureTable tbody .totalRow th {
+  font-weight: 600;
+}
+
+.money {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.sum {
+  font-weight: 600;
+}
+
+.colNote {
+  font-weight: 400;
+  color: var(--color-slate);
+}
+
+@media (min-width: 1200px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: var(--space-7);
+  }
+
+  .figures {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .panel {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0 0 0 var(--space-6);
+    border-left: 1px solid var(--color-rule);
+    border-radius: 0;
+    background: none;
+  }
+}

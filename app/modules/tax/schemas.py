@@ -46,6 +46,7 @@ class PropertySummary(BaseModel):
     is_archived: bool
     transaction_count: int
     totals: Totals  # this owner's share
+    categories: list[CategoryAmount]  # this owner's share; they add up to the summary's
 
 
 class TaxSummary(BaseModel):

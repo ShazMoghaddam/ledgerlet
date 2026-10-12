@@ -125,6 +125,16 @@ def test_per_property_breakdown(service, portfolio, landlord_id) -> None:
     assert by_name["Oak Road"].ownership_percentage == Decimal("50")
 
 
+def test_property_categories_add_up_to_the_summary(service, portfolio, landlord_id) -> None:
+    s = service.summary(landlord_id, 2, 2026, STANDARD)
+    by_name = {p.nickname: amounts(p) for p in s.properties}
+    assert by_name["Oak Road"][C.PROFESSIONAL_FEES] == Decimal("60.00")
+    assert by_name["Oak Road"][C.RENTAL_INCOME] == Decimal("400.51")
+    assert by_name["Elm Court"][C.TRAVEL_COSTS] == Decimal("15.00")
+    for cat, total in amounts(s).items():
+        assert sum(p[cat] for p in by_name.values()) == total
+
+
 def test_archived_property_still_counts_for_its_period(
     service, properties, portfolio, landlord_id
 ) -> None:

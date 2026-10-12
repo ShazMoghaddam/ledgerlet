@@ -99,6 +99,7 @@ class TaxService:
                     is_archived=prop.is_archived,
                     transaction_count=len(transactions),
                     totals=_totals(Headline.from_totals(share)),
+                    categories=_categories(share),
                 )
             )
 
@@ -113,12 +114,7 @@ class TaxService:
             deadline=period.deadline,
             status=period.status(self._today()),
             totals=_totals(Headline.from_totals(combined)),
-            categories=[
-                CategoryAmount(
-                    category=cat, label=cat.label, kind=cat.kind, amount=from_pence(pence)
-                )
-                for cat, pence in combined.items()
-            ],
+            categories=_categories(combined),
             properties=property_summaries,
         )
 
@@ -147,6 +143,13 @@ class TaxService:
 
     def _resolve_year(self, tax_year: int | None) -> int:
         return tax_year if tax_year is not None else tax_year_containing(self._today())
+
+
+def _categories(totals: dict[TransactionCategory, int]) -> list[CategoryAmount]:
+    return [
+        CategoryAmount(category=cat, label=cat.label, kind=cat.kind, amount=from_pence(pence))
+        for cat, pence in totals.items()
+    ]
 
 
 def _totals(headline: Headline) -> Totals:

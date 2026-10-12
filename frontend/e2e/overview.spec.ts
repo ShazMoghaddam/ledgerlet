@@ -63,8 +63,8 @@ test("keyboard: skip link first, then the main navigation", async ({ page }) => 
 test("moving between sections announces the new page", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Tax" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Tax" })).toBeFocused();
-  await expect(page).toHaveTitle("Tax | LedgerLet");
+  await expect(page.getByRole("heading", { level: 1, name: "Tax year 2026-27" })).toBeFocused();
+  await expect(page).toHaveTitle("Tax year 2026-27 | LedgerLet");
 });
 
 test("no automatically detectable accessibility problems", async ({ page }) => {

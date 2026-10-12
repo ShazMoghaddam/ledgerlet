@@ -73,9 +73,11 @@ export const useHmrcConnection = () =>
     queryFn: async () => unwrap(await api.GET("/api/v1/hmrc/connection")),
   });
 
-export const useTaxpayer = () =>
+/** Only worth asking once connected: without a connection HMRC can't be asked. */
+export const useTaxpayer = (enabled = true) =>
   useQuery({
     queryKey: keys.taxpayer,
+    enabled,
     queryFn: async () => unwrap(await api.GET("/api/v1/hmrc/taxpayer")),
   });
 

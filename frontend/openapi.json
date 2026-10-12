@@ -2782,6 +2782,13 @@
           },
           "totals": {
             "$ref": "#/components/schemas/Totals"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryAmount"
+            },
+            "type": "array",
+            "title": "Categories"
           }
         },
         "type": "object",
@@ -2791,7 +2798,8 @@
           "ownership_percentage",
           "is_archived",
           "transaction_count",
-          "totals"
+          "totals",
+          "categories"
         ],
         "title": "PropertySummary"
       },
