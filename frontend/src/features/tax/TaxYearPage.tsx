@@ -15,7 +15,7 @@ import {
   taxYearOf,
   taxYearPath,
 } from "../../lib/taxYear";
-import { NotFoundPage } from "../placeholder/SectionPlaceholder";
+import { NotFoundPage } from "../notFound/NotFoundPage";
 import { QuarterStatus } from "./QuarterStatus";
 import s from "./Tax.module.css";
 

@@ -1,0 +1,150 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  max-width: 44rem;
+}
+
+.page h1 {
+  font-size: var(--text-title);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1.5px solid var(--color-rule-strong);
+}
+
+.section h2 {
+  font-size: var(--text-section);
+}
+
+.prose {
+  text-wrap: pretty;
+}
+
+.note {
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+  text-wrap: pretty;
+}
+
+.meta {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-slate);
+}
+
+.strong {
+  justify-self: start;
+  font-weight: 600;
+}
+
+.problem {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-red);
+  background: var(--color-red-tint);
+  font-weight: 600;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-5);
+}
+
+.facts dt {
+  color: var(--color-slate);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.inlineForm {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.nameInput {
+  max-width: 22rem;
+}
+
+.current {
+  font-weight: 600;
+}
+
+.choices {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+}
+
+/* A radio card: the label's ::after covers the card, so all of it is the target. */
+.option {
+  position: relative;
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  border: 1.5px solid var(--color-field);
+  border-radius: var(--radius-control);
+}
+
+.option:has(input:checked) {
+  border: 2px solid var(--color-ledger);
+  background: var(--color-ledger-tint);
+}
+
+.option:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.option input {
+  position: relative;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  flex: none;
+  accent-color: var(--color-ledger);
+}
+
+.optionBody {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.optionLabel {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.optionLabel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.optionText {
+  color: var(--color-slate);
+  font-size: var(--text-small);
+}
+
+.credit {
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+}

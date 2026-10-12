@@ -10,14 +10,13 @@ import { ImportPage } from "../features/import/ImportPage";
 import { OverviewPage } from "../features/overview/OverviewPage";
 import { EditTransactionPage, NewTransactionPage } from "../features/transactions/TransactionForm";
 import { TransactionsPage } from "../features/transactions/TransactionsPage";
-import { NotFoundPage, SectionPlaceholder } from "../features/placeholder/SectionPlaceholder";
+import { NotFoundPage } from "../features/notFound/NotFoundPage";
 import { PropertiesPage } from "../features/properties/PropertiesPage";
 import { EditPropertyPage, NewPropertyPage } from "../features/properties/PropertyForm";
 import { PropertyPage } from "../features/properties/PropertyPage";
+import { SettingsPage } from "../features/settings/SettingsPage";
 import { QuarterPage } from "../features/tax/QuarterPage";
 import { TaxYearPage } from "../features/tax/TaxYearPage";
-
-const soon = "This screen is being built and arrives in the next update.";
 
 /** Every URL in the app. Filters and steps will live in the URL too, so links and Back work. */
 export const routes: RouteObject[] = [
@@ -43,10 +42,7 @@ export const routes: RouteObject[] = [
           { path: "properties/new", element: <NewPropertyPage /> },
           { path: "properties/:id", element: <PropertyPage /> },
           { path: "properties/:id/edit", element: <EditPropertyPage /> },
-          {
-            path: "settings",
-            element: <SectionPlaceholder title="Settings" description={soon} showSignOut />,
-          },
+          { path: "settings", element: <SettingsPage /> },
           { path: "settings/hmrc", element: <HmrcSettingsPage /> },
           { path: "*", element: <NotFoundPage /> },
         ],

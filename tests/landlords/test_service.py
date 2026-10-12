@@ -1,6 +1,7 @@
 import pytest
 
 from app.core.auth import VerifiedIdentity
+from app.core.exceptions import ConflictError
 from app.modules.landlords.schemas import LandlordUpdate
 from app.modules.landlords.service import LandlordService
 from app.modules.tax.periods import PeriodBasis
@@ -53,3 +54,23 @@ def test_update_profile(service) -> None:
         landlord, LandlordUpdate(display_name="Shaz", period_basis=PeriodBasis.CALENDAR)
     )
     assert (updated.display_name, updated.period_basis) == ("Shaz", PeriodBasis.CALENDAR)
+
+
+def test_basis_can_change_before_anything_is_sent(repo) -> None:
+    service = LandlordService(repo, sent_this_tax_year=lambda _id: False)
+    landlord = service.sign_in(identity())
+    service.update_profile(landlord, LandlordUpdate(period_basis=PeriodBasis.CALENDAR))
+    assert landlord.period_basis is PeriodBasis.CALENDAR
+
+
+def test_basis_is_fixed_once_hmrc_has_an_update_this_year(repo) -> None:
+    service = LandlordService(repo, sent_this_tax_year=lambda _id: True)
+    landlord = service.sign_in(identity())
+    with pytest.raises(ConflictError, match="can't change until the next tax year"):
+        service.update_profile(landlord, LandlordUpdate(period_basis=PeriodBasis.CALENDAR))
+    assert landlord.period_basis is PeriodBasis.STANDARD
+    # Other settings, and "changing" to the same basis, are still fine.
+    service.update_profile(
+        landlord, LandlordUpdate(display_name="Shaz", period_basis=PeriodBasis.STANDARD)
+    )
+    assert landlord.display_name == "Shaz"

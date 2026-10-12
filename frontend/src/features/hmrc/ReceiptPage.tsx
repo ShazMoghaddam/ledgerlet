@@ -11,7 +11,7 @@ import { formatDayMonth, formatLong, formatShort, ukToday } from "../../lib/date
 import { formatPence } from "../../lib/money";
 import { quarterStates } from "../../lib/quarters";
 import { parseTaxPath, quarterPath, submitPath } from "../../lib/taxYear";
-import { NotFoundPage } from "../placeholder/SectionPlaceholder";
+import { NotFoundPage } from "../notFound/NotFoundPage";
 import { sentFigures } from "./sentFigures";
 import s from "./Submit.module.css";
 

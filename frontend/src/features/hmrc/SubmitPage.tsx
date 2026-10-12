@@ -21,7 +21,7 @@ import {
   submitPath,
   taxYearOf,
 } from "../../lib/taxYear";
-import { NotFoundPage } from "../placeholder/SectionPlaceholder";
+import { NotFoundPage } from "../notFound/NotFoundPage";
 import { Checklist } from "../tax/Checklist";
 import { hmrcSettingsPath, useReadiness } from "../tax/readiness";
 import { usePreviewUpdate, useSendUpdate } from "./mutations";

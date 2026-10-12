@@ -85,3 +85,41 @@ def test_landlords_only_see_their_own_properties(client: TestClient) -> None:
     pid = resp.json()["id"]
     assert client.get(f"{API}/properties/{pid}", headers=headers("bob")).status_code == 404
     assert client.get(f"{API}/properties", headers=headers(str(uuid4()))).json() == []
+
+
+def test_basis_is_fixed_once_hmrc_accepted_an_update_this_year(
+    client: TestClient, db_session
+) -> None:
+    from datetime import UTC, date, datetime
+    from uuid import UUID
+
+    from app.core.time import uk_today
+    from app.modules.hmrc.models import HmrcSubmission
+    from app.modules.tax.periods import tax_year_containing
+
+    me = client.get(f"{API}/me", headers=headers("alice")).json()
+    year = tax_year_containing(uk_today())
+    db_session.add(
+        HmrcSubmission(
+            landlord_id=UUID(me["id"]),
+            business_id="XPIS00000000001",
+            tax_year=year,
+            quarter=1,
+            period_start=date(year, 4, 6),
+            period_end=date(year, 7, 5),
+            consolidated_expenses=False,
+            request_body={},
+            status_code=204,
+            succeeded=True,
+            hmrc_correlation_id="ref",
+            response_body={},
+            submitted_at=datetime.now(UTC),
+        )
+    )
+    db_session.commit()
+
+    resp = client.patch(f"{API}/me", json={"period_basis": "calendar"}, headers=headers("alice"))
+    assert resp.status_code == 409
+    assert "until the next tax year" in resp.json()["detail"]
+    ok = client.patch(f"{API}/me", json={"display_name": "Alice"}, headers=headers("alice"))
+    assert ok.status_code == 200
