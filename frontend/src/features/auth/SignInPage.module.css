@@ -67,9 +67,3 @@
 .field textarea[aria-invalid="true"] {
   border: 2px solid var(--color-red);
 }
-
-.footer {
-  color: var(--color-slate);
-  font-size: var(--text-caption);
-  text-align: center;
-}

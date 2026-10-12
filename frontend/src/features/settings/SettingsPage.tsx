@@ -240,6 +240,15 @@ function About() {
       <p className={s.note}>
         LedgerLet is independent software. It isn’t made or endorsed by HMRC.
       </p>
+      <p>
+        <Link className={s.strong} to="/privacy">
+          Privacy notice
+        </Link>
+        {" · "}
+        <Link className={s.strong} to="/terms">
+          Terms of use
+        </Link>
+      </p>
       <p className={s.credit}>
         © 2026 LedgerLet. Built in London by{" "}
         <a href="https://shazmoghaddam.github.io/" rel="author">

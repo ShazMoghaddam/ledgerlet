@@ -10,6 +10,8 @@ import { ImportPage } from "../features/import/ImportPage";
 import { OverviewPage } from "../features/overview/OverviewPage";
 import { EditTransactionPage, NewTransactionPage } from "../features/transactions/TransactionForm";
 import { TransactionsPage } from "../features/transactions/TransactionsPage";
+import { PrivacyPage } from "../features/legal/PrivacyPage";
+import { TermsPage } from "../features/legal/TermsPage";
 import { NotFoundPage } from "../features/notFound/NotFoundPage";
 import { PropertiesPage } from "../features/properties/PropertiesPage";
 import { EditPropertyPage, NewPropertyPage } from "../features/properties/PropertyForm";
@@ -21,6 +23,9 @@ import { TaxYearPage } from "../features/tax/TaxYearPage";
 /** Every URL in the app. Filters and steps will live in the URL too, so links and Back work. */
 export const routes: RouteObject[] = [
   { path: "/sign-in", element: <SignInPage /> },
+  // Public, so HMRC and anyone thinking of signing up can read them.
+  { path: "/privacy", element: <PrivacyPage /> },
+  { path: "/terms", element: <TermsPage /> },
   {
     element: <RequireSignIn />,
     children: [
