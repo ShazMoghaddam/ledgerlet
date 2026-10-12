@@ -25,6 +25,12 @@ const summaries: Record<string, unknown> = { "1": summaryQ1, "2": summaryQ2, "3"
 export const handlers = [
   http.get("/api/v1/me", () => HttpResponse.json(me)),
   http.get("/api/v1/properties", () => HttpResponse.json(properties)),
+  http.get("/api/v1/properties/:id", ({ params }) => {
+    const found = properties.find((p) => p.id === params.id);
+    return found
+      ? HttpResponse.json(found)
+      : HttpResponse.json({ detail: "Property not found" }, { status: 404 });
+  }),
   http.get("/api/v1/tax/obligations", () => HttpResponse.json(obligations)),
   http.get("/api/v1/tax/summary", ({ request }) => {
     const quarter = new URL(request.url).searchParams.get("quarter") ?? "";

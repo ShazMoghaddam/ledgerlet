@@ -9,7 +9,7 @@ import f from "../../components/Field.module.css";
 import { LoadFailed, Loading } from "../../components/QueryState";
 import { whoseProperties } from "../../components/Statement";
 import { usePageTitle } from "../../hooks/usePageTitle";
-import { formatLong, formatShort, ukToday } from "../../lib/dates";
+import { formatDayMonth, formatLong, ukToday } from "../../lib/dates";
 import { formatPence, toPence } from "../../lib/money";
 import { updatePeriodKey } from "../../lib/periods";
 import { quarterStates, type Quarter } from "../../lib/quarters";
@@ -261,7 +261,7 @@ function CheckStep({
           Check your figures
         </h1>
         <p className={s.lead}>
-          Totals from {formatShort(summary.period_start)} to {formatLong(summary.period_end)}, at
+          Totals from {formatDayMonth(summary.period_start)} to {formatLong(summary.period_end)}, at
           your share of {whoseProperties(summary.properties.length)}.
         </p>
       </div>
@@ -449,7 +449,8 @@ function ConfirmStep({
               <div>
                 <dt>Period</dt>
                 <dd>
-                  {formatShort(preview.data.period_start)} to {formatLong(preview.data.period_end)}
+                  {formatDayMonth(preview.data.period_start)} to{" "}
+                  {formatLong(preview.data.period_end)}
                 </dd>
               </div>
               {business && (

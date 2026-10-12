@@ -97,6 +97,16 @@ export async function asSampleLandlord(page: Page) {
         return json([...submissions, ...sent]);
       default:
         if (path === `/transactions/${boiler.id}`) return json(boiler);
+        {
+          const match = /^\/properties\/([^/]+)$/.exec(path);
+          const found = match && properties.find((p) => p.id === match[1]);
+          if (found)
+            return json(
+              method === "PATCH" ? { ...found, ...route.request().postDataJSON() } : found,
+            );
+        }
+        if (path === "/properties" && method === "POST")
+          return route.fulfill({ status: 201, json: properties[1] });
         return route.fulfill({ status: 404, json: { detail: `No mock for ${path}` } });
     }
   });
