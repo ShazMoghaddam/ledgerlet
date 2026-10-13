@@ -78,6 +78,7 @@ class BusinessIdIn(BaseModel):
 class TaxpayerRead(BaseModel):
     nino: str | None  # always masked
     uk_property_business_id: str | None
+    sandbox: bool = False  # HMRC's sandbox: test businesses can be created
 
 
 class BusinessRead(BaseModel):

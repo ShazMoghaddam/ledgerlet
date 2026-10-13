@@ -189,3 +189,12 @@ def test_failures_carry_a_reason_code(service, landlord_id, state, nonce, code, 
             start.nonce if nonce == "ok" else nonce,
         )
     assert caught.value.reason == reason
+
+
+def test_a_refused_approval_logs_hmrcs_reason(service, landlord_id, caplog) -> None:
+    # Without HMRC's reason (invalid_client, invalid_grant...) a wrong setting on the
+    # server can't be told apart from a stale link.
+    start = service.start(landlord_id)
+    with caplog.at_level("WARNING"), pytest.raises(HmrcConnectError):
+        service.complete("bad-code", state_from(start.authorize_url), start.nonce)
+    assert "HMRC token exchange failed: invalid_grant" in caplog.text

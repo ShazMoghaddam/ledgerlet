@@ -19,7 +19,11 @@ export const notConnected: HmrcConnection = {
   scope: null,
 };
 
-export const taxpayer: Taxpayer = { nino: "OE****77A", uk_property_business_id: "XDIS36257256364" };
+export const taxpayer: Taxpayer = {
+  nino: "OE****77A",
+  uk_property_business_id: "XDIS36257256364",
+  sandbox: false,
+};
 
 /** Quarter 1 was sent on 4 August. */
 export const submissions: Submission[] = [

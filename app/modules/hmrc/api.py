@@ -12,9 +12,13 @@ import httpx
 BUSINESS_DETAILS_VERSION = "2.0"
 OBLIGATIONS_VERSION = "3.0"
 PROPERTY_BUSINESS_VERSION = "6.0"
+TEST_SUPPORT_VERSION = "1.0"  # sandbox only
 
 LIST_BUSINESSES = "/individuals/business/details/{nino}/list"
 OBLIGATIONS = "/obligations/details/{nino}/income-and-expenditure"
+# Self Assessment Test Support: gives a sandbox test user a business. HMRC deletes
+# these after 7 days, so a long-running demo needs a way to make another.
+CREATE_TEST_BUSINESS = "/individuals/self-assessment-test-support/business/{nino}"
 UK_PROPERTY_CUMULATIVE = (
     "/individuals/business/property/uk/{nino}/{business_id}/cumulative/{tax_year}"
 )
@@ -58,6 +62,15 @@ class HmrcApi(Protocol):
         test_scenario: str | None = None,
     ) -> HmrcResponse: ...
 
+    def post(
+        self,
+        path: str,
+        version: str,
+        access_token: str,
+        fraud_headers: dict[str, str],
+        body: dict[str, Any],
+    ) -> HmrcResponse: ...
+
 
 class HttpxHmrcApi:
     def __init__(self, base_url: str) -> None:
@@ -90,6 +103,16 @@ class HttpxHmrcApi:
             "PUT", path, version, access_token, fraud_headers, test_scenario, json=body
         )
 
+    def post(
+        self,
+        path: str,
+        version: str,
+        access_token: str,
+        fraud_headers: dict[str, str],
+        body: dict[str, Any],
+    ) -> HmrcResponse:
+        return self._send("POST", path, version, access_token, fraud_headers, None, json=body)
+
     def _send(
         self,
         method: str,
@@ -112,7 +135,9 @@ class HttpxHmrcApi:
         if method == "GET":
             response = httpx.get(url, headers=headers, params=params, timeout=TIMEOUT_SECONDS)
         else:
-            response = httpx.put(url, headers=headers, json=json, timeout=TIMEOUT_SECONDS)
+            response = httpx.request(
+                method, url, headers=headers, json=json, timeout=TIMEOUT_SECONDS
+            )
         try:
             body = response.json() if response.content else {}
         except ValueError:

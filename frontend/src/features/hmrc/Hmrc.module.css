@@ -87,3 +87,12 @@
   align-items: center;
   gap: var(--space-3);
 }
+
+.sandboxNote {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 40rem;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-slate);
+  background: var(--color-shelf);
+}

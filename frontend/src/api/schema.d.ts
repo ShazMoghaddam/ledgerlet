@@ -364,6 +364,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hmrc/sandbox/property-business": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Test Property Business
+         * @description HMRC's sandbox only (404 otherwise): give the test user a UK property business.
+         *
+         *     HMRC deletes sandbox test businesses after 7 days; this makes another and selects it.
+         */
+        post: operations["create_test_property_business_api_v1_hmrc_sandbox_property_business_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hmrc/obligations": {
         parameters: {
             query?: never;
@@ -965,6 +987,11 @@ export interface components {
             nino: string | null;
             /** Uk Property Business Id */
             uk_property_business_id: string | null;
+            /**
+             * Sandbox
+             * @default false
+             */
+            sandbox: boolean;
         };
         /** Totals */
         Totals: {
@@ -1985,6 +2012,37 @@ export interface operations {
         };
     };
     discover_businesses_api_v1_hmrc_businesses_discover_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-ledgerlet-device"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_test_property_business_api_v1_hmrc_sandbox_property_business_post: {
         parameters: {
             query?: never;
             header?: {

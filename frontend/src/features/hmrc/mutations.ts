@@ -47,6 +47,15 @@ export function useDiscoverBusinesses() {
   });
 }
 
+/** HMRC's sandbox only: give the test user a UK property business, then select it. */
+export function useCreateTestBusiness() {
+  const refresh = useRefreshHmrc();
+  return useMutation({
+    mutationFn: async () => unwrap(await api.POST("/api/v1/hmrc/sandbox/property-business")),
+    onSuccess: refresh,
+  });
+}
+
 export function useSetBusiness() {
   const refresh = useRefreshHmrc();
   return useMutation({

@@ -25,7 +25,7 @@ def connect(client: TestClient, who: str = "alice") -> None:
 def test_nino_round_trip_is_masked(client: TestClient) -> None:
     resp = client.put(f"{API}/taxpayer", json={"nino": "oe 18 06 77 a"}, headers=headers("alice"))
     assert resp.status_code == 200, resp.text
-    assert resp.json() == {"nino": "OE****77A", "uk_property_business_id": None}
+    assert resp.json() == {"nino": "OE****77A", "uk_property_business_id": None, "sandbox": True}
     assert client.get(f"{API}/taxpayer", headers=headers("alice")).json()["nino"] == "OE****77A"
 
 
@@ -78,3 +78,19 @@ def test_manual_business_choice(client: TestClient) -> None:
         headers=headers("alice"),
     )
     assert resp.json()["uk_property_business_id"] == "XPIS12345678901"
+
+
+
+def test_sandbox_makes_a_test_property_business_and_selects_it(
+    client: TestClient, fake_hmrc_api
+) -> None:
+    connect(client)
+    client.put(f"{API}/taxpayer", json={"nino": "OE180677A"}, headers=headers("alice"))
+    assert client.get(f"{API}/taxpayer", headers=headers("alice")).json()["sandbox"] is True
+    fake_hmrc_api.businesses = []  # HMRC deleted the old one
+
+    resp = client.post(f"{API}/sandbox/property-business", headers=signed_in())
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["selected_business_id"] == "XPIS99999999999"
+    post = next(c for c in fake_hmrc_api.calls if c.get("method") == "POST")
+    assert post["fraud_headers"]["Gov-Client-Device-ID"] == DEVICE["device_id"]

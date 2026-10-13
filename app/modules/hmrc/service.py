@@ -12,6 +12,7 @@ The OAuth dance, and how it's protected:
 """
 
 import hmac
+import logging
 import secrets
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -25,6 +26,8 @@ from app.core.time import as_utc, utc_now
 from app.modules.hmrc.crypto import DecryptionError, TokenCipher
 from app.modules.hmrc.models import HmrcConnection
 from app.modules.hmrc.oauth import HmrcAuthError, OAuthClient, TokenGrant
+
+logger = logging.getLogger(__name__)
 
 STATE_PURPOSE = "hmrc-connect"
 STATE_MAX_AGE_SECONDS = 600
@@ -136,7 +139,10 @@ class HmrcConnectionService:
 
         try:
             grant = self._oauth.exchange_code(code)
-        except HmrcAuthError:
+        except HmrcAuthError as exc:
+            # HMRC's reason (e.g. invalid_client: a wrong client ID or secret) holds no
+            # secrets, and is the only way to tell which setting is wrong.
+            logger.warning("HMRC token exchange failed: %s", exc)
             raise HmrcConnectError(
                 "HMRC did not accept the approval. Please try again", "rejected"
             ) from None

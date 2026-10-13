@@ -161,4 +161,43 @@ it("says plainly when HMRC has no property business for the number", async () =>
   renderApp("/settings/hmrc");
   await user.click(await screen.findByRole("button", { name: "Find my property business" }));
   expect(await screen.findByText(/HMRC has no UK property business/)).toBeInTheDocument();
+  // Only HMRC's test service can make one.
+  expect(
+    screen.queryByRole("button", { name: "Create a test property business" }),
+  ).not.toBeInTheDocument();
+});
+
+it("in HMRC's test service, makes a test property business and selects it", async () => {
+  let created = false;
+  server.use(
+    http.get("/api/v1/hmrc/taxpayer", () =>
+      HttpResponse.json(
+        created
+          ? { ...taxpayer, sandbox: true }
+          : { ...taxpayer, uk_property_business_id: null, sandbox: true },
+      ),
+    ),
+    http.post("/api/v1/hmrc/businesses/discover", () =>
+      HttpResponse.json({ businesses: [], selected_business_id: null }),
+    ),
+    http.post("/api/v1/hmrc/sandbox/property-business", () => {
+      created = true;
+      return HttpResponse.json({
+        businesses: [
+          {
+            business_id: taxpayer.uk_property_business_id,
+            type_of_business: "uk-property",
+            trading_name: null,
+          },
+        ],
+        selected_business_id: taxpayer.uk_property_business_id,
+      });
+    }),
+  );
+  const user = userEvent.setup();
+  renderApp("/settings/hmrc");
+  await user.click(await screen.findByRole("button", { name: "Find my property business" }));
+  expect(await screen.findByText(/HMRC removes it after 7 days/)).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Create a test property business" }));
+  expect(await screen.findByText("XDIS36257256364")).toBeInTheDocument();
 });

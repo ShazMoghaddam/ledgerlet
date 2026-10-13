@@ -9,12 +9,13 @@ from datetime import date
 from typing import Any, Protocol
 from uuid import UUID
 
-from app.core.exceptions import ConflictError, UpstreamError
+from app.core.exceptions import ConflictError, NotFoundError, UpstreamError
 from app.modules.hmrc import api
 from app.modules.hmrc.api import HmrcApi, HmrcResponse
 from app.modules.hmrc.crypto import TokenCipher
 from app.modules.hmrc.models import HmrcTaxpayer
 from app.modules.hmrc.nino import mask_nino, normalise_nino
+from app.modules.tax.periods import tax_year_label
 
 UK_PROPERTY = "uk-property"
 
@@ -26,6 +27,10 @@ class HmrcApiError(UpstreamError):
         ref = f" (HMRC reference {response.correlation_id})" if response.correlation_id else ""
         super().__init__(f"HMRC refused to {action}: {code}: {message}{ref}")
         self.response = response
+
+
+class SandboxOnlyError(NotFoundError):
+    pass
 
 
 class HmrcProfileMissingError(ConflictError):
@@ -101,6 +106,40 @@ class HmrcTaxpayerService:
         taxpayer.uk_property_business_id = business_id
         self._repo.commit()
         return taxpayer
+
+    @property
+    def sandbox(self) -> bool:
+        """Talking to HMRC's sandbox, where test data can be created."""
+        return self._sandbox
+
+    def create_test_property_business(
+        self, landlord_id: UUID, fraud_headers: dict[str, str], tax_year: int
+    ) -> tuple[list[Business], HmrcTaxpayer]:
+        """Sandbox only: give the test user a UK property business, then find it."""
+        if not self._sandbox:
+            raise SandboxOnlyError("Test businesses can only be made in HMRC's sandbox")
+        taxpayer = self._require(landlord_id)
+        token = self._tokens.access_token(landlord_id)  # 409 if not connected
+        response = self._hmrc.post(
+            api.CREATE_TEST_BUSINESS.format(nino=self._nino(taxpayer)),
+            api.TEST_SUPPORT_VERSION,
+            token,
+            fraud_headers,
+            {
+                "typeOfBusiness": UK_PROPERTY,
+                "firstAccountingPeriodStartDate": f"{tax_year}-04-06",
+                "firstAccountingPeriodEndDate": f"{tax_year + 1}-04-05",
+                "quarterlyTypeChoice": {
+                    "quarterlyPeriodType": "standard",
+                    "taxYearOfChoice": tax_year_label(tax_year),
+                },
+                "accountingType": "CASH",
+                "commencementDate": "2020-04-06",
+            },
+        )
+        if not response.ok:
+            raise HmrcApiError("create a test property business", response)
+        return self.discover_businesses(landlord_id, fraud_headers)
 
     # Reading from HMRC
 

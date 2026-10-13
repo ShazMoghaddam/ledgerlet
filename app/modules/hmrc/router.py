@@ -159,18 +159,19 @@ def discover_businesses(
     landlord_id: CurrentLandlordId, fraud_headers: FraudHeadersDep, service: TaxpayerServiceDep
 ):
     """Ask HMRC which businesses this landlord has; auto-select a single UK property one."""
-    businesses, taxpayer = service.discover_businesses(landlord_id, fraud_headers)
-    return DiscoveryRead(
-        businesses=[
-            BusinessRead(
-                business_id=b.business_id,
-                type_of_business=b.type_of_business,
-                trading_name=b.trading_name,
-            )
-            for b in businesses
-        ],
-        selected_business_id=taxpayer.uk_property_business_id,
-    )
+    return _discovery(*service.discover_businesses(landlord_id, fraud_headers))
+
+
+@router.post("/sandbox/property-business", response_model=DiscoveryRead)
+def create_test_property_business(
+    landlord_id: CurrentLandlordId, fraud_headers: FraudHeadersDep, service: TaxpayerServiceDep
+):
+    """HMRC's sandbox only (404 otherwise): give the test user a UK property business.
+
+    HMRC deletes sandbox test businesses after 7 days; this makes another and selects it.
+    """
+    year = tax_year_containing(uk_today())
+    return _discovery(*service.create_test_property_business(landlord_id, fraud_headers, year))
 
 
 @router.get("/obligations", response_model=HmrcObligationsRead)
@@ -287,10 +288,25 @@ document.getElementById("out").textContent = JSON.stringify(device);
 
 def _taxpayer(service, taxpayer: HmrcTaxpayer | None) -> TaxpayerRead:
     if taxpayer is None:
-        return TaxpayerRead(nino=None, uk_property_business_id=None)
+        return TaxpayerRead(nino=None, uk_property_business_id=None, sandbox=service.sandbox)
     return TaxpayerRead(
         nino=service.masked_nino(taxpayer),
         uk_property_business_id=taxpayer.uk_property_business_id,
+        sandbox=service.sandbox,
+    )
+
+
+def _discovery(businesses, taxpayer: HmrcTaxpayer) -> DiscoveryRead:
+    return DiscoveryRead(
+        businesses=[
+            BusinessRead(
+                business_id=b.business_id,
+                type_of_business=b.type_of_business,
+                trading_name=b.trading_name,
+            )
+            for b in businesses
+        ],
+        selected_business_id=taxpayer.uk_property_business_id,
     )
 
 
