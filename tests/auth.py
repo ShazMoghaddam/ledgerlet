@@ -38,6 +38,7 @@ def mint_token(
     expires_in: int = 3600,
     key: Any = PRIVATE_KEY,
     kid: str | None = KID,
+    extra: dict[str, Any] | None = None,
 ) -> str:
     now = int(time.time())
     claims: dict[str, Any] = {"iss": issuer, "aud": audience, "iat": now, "exp": now + expires_in}
@@ -45,6 +46,7 @@ def mint_token(
         claims["sub"] = subject
     if email is not None:
         claims["email"] = email
+    claims.update(extra or {})
     return jwt.encode(claims, key, algorithm="RS256", headers={"kid": kid} if kid else None)
 
 

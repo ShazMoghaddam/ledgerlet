@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react";
 
-import { getToken, subscribe } from "./session";
+import { isSignedIn, subscribe } from "./session";
 
-/** The current token, re-rendering when the landlord signs in or out. */
-export function useToken(): string | null {
-  return useSyncExternalStore(subscribe, getToken, () => null);
+/** Whether someone is signed in, re-rendering when that changes. */
+export function useSignedIn(): boolean {
+  return useSyncExternalStore(subscribe, isSignedIn, () => false);
 }
 
 /** Only follow "next" links that stay inside the app. */

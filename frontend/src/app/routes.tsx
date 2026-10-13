@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router";
 
 import { RequireSignIn } from "../auth/RequireSignIn";
 import { AppShell } from "../components/AppShell";
+import { CallbackPage } from "../features/auth/CallbackPage";
 import { SignInPage } from "../features/auth/SignInPage";
 import { HmrcSettingsPage } from "../features/hmrc/HmrcSettingsPage";
 import { ReceiptPage } from "../features/hmrc/ReceiptPage";
@@ -23,6 +24,7 @@ import { TaxYearPage } from "../features/tax/TaxYearPage";
 /** Every URL in the app. Filters and steps will live in the URL too, so links and Back work. */
 export const routes: RouteObject[] = [
   { path: "/sign-in", element: <SignInPage /> },
+  { path: "/sign-in/callback", element: <CallbackPage /> },
   // Public, so HMRC and anyone thinking of signing up can read them.
   { path: "/privacy", element: <PrivacyPage /> },
   { path: "/terms", element: <TermsPage /> },

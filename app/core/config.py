@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     auth_audience: str = "ledgerlet-api"
     auth_jwks_url: str | None = None
     auth_jwks_file: str | None = None
+    # The token claim holding the landlord's email. Auth0 puts it in access tokens only
+    # through an Action, under a namespaced name (see the README).
+    auth_email_claim: str = "email"
 
     # HMRC (Making Tax Digital). Defaults point at HMRC's sandbox.
     hmrc_base_url: str = "https://test-api.service.hmrc.gov.uk"

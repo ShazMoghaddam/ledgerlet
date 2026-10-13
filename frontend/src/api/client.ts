@@ -5,13 +5,13 @@
  */
 import createClient, { type Middleware } from "openapi-fetch";
 
-import { getToken, signOut } from "../auth/session";
+import { endSession, getAccessToken } from "../auth/session";
 import { deviceHeader } from "./device";
 import type { paths } from "./schema";
 
 const auth: Middleware = {
-  onRequest({ request }) {
-    const token = getToken();
+  async onRequest({ request }) {
+    const token = await getAccessToken();
     if (token) request.headers.set("Authorization", `Bearer ${token}`);
     if (new URL(request.url).pathname.startsWith("/api/v1/hmrc/")) {
       request.headers.set("X-LedgerLet-Device", deviceHeader());
@@ -20,7 +20,7 @@ const auth: Middleware = {
   },
   onResponse({ response }) {
     // Expired or invalid sign-in: drop it, and the app shows the sign-in page.
-    if (response.status === 401) signOut();
+    if (response.status === 401) void endSession();
     return response;
   },
 };

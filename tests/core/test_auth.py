@@ -11,7 +11,7 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from app.core.auth import InvalidTokenError, StaticKeySource
+from app.core.auth import InvalidTokenError, StaticKeySource, TokenVerifier
 from tests.auth import AUDIENCE, ISSUER, JWKS, KID, PRIVATE_KEY, make_verifier, mint_token
 
 
@@ -28,6 +28,15 @@ def test_valid_token_gives_identity(verifier) -> None:
 
 def test_email_is_optional(verifier) -> None:
     assert verifier.verify(mint_token("user-1")).email is None
+
+
+def test_email_can_come_from_a_namespaced_claim() -> None:
+    """Auth0 adds the email to access tokens only under a namespaced claim name."""
+    verifier = TokenVerifier(
+        ISSUER, AUDIENCE, StaticKeySource(JWKS), email_claim="https://ledgerlet.app/email"
+    )
+    token = mint_token("user-1", extra={"https://ledgerlet.app/email": "a@example.com"})
+    assert verifier.verify(token).email == "a@example.com"
 
 
 def test_slight_clock_skew_is_tolerated(verifier) -> None:
