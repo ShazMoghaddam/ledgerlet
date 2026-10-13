@@ -1,0 +1,62 @@
+# Render Blueprint: the LedgerLet demo. In Render: New > Blueprint, pick this repo.
+# One web service (the API serving the web app) and one Postgres database, both in
+# Frankfurt (Render has no UK region). Values marked "sync: false" are asked for
+# once, when the Blueprint is created. See "Deploying to Render" in the README.
+#
+# Free plans, for a demo: the service sleeps after 15 minutes idle (about a minute
+# to wake) and the free database is deleted 30 days after it's created. Change
+# both plans before real use.
+
+services:
+  - type: web
+    name: ledgerlet
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    autoDeployTrigger: checksPass # only deploy what CI has passed
+    healthCheckPath: /health
+    envVars:
+      - key: LEDGERLET_ENVIRONMENT
+        value: production
+      - key: LEDGERLET_DATABASE_URL
+        fromDatabase:
+          name: ledgerlet-db
+          property: connectionString
+      # Render's proxy sits in front: use its forwarded headers for the visitor's IP.
+      - key: LEDGERLET_TRUST_PROXY_HEADERS
+        value: "true"
+
+      # Sign-in (Auth0). The API checks tokens against these...
+      - key: LEDGERLET_AUTH_ISSUER # https://YOUR-TENANT.uk.auth0.com/
+        sync: false
+      - key: LEDGERLET_AUTH_JWKS_URL # https://YOUR-TENANT.uk.auth0.com/.well-known/jwks.json
+        sync: false
+      - key: LEDGERLET_AUTH_AUDIENCE
+        value: https://api.ledgerlet.app
+      - key: LEDGERLET_AUTH_EMAIL_CLAIM
+        value: https://ledgerlet.app/email
+      # ...and the web app is built with these (public values, not secrets).
+      - key: VITE_AUTH0_DOMAIN # YOUR-TENANT.uk.auth0.com
+        sync: false
+      - key: VITE_AUTH0_CLIENT_ID
+        sync: false
+      - key: VITE_AUTH0_AUDIENCE
+        value: https://api.ledgerlet.app
+
+      # HMRC sandbox (Developer Hub). Secrets: only ever entered here, never committed.
+      - key: LEDGERLET_HMRC_CLIENT_ID
+        sync: false
+      - key: LEDGERLET_HMRC_CLIENT_SECRET
+        sync: false
+      - key: LEDGERLET_HMRC_TOKEN_KEY # a new Fernet key, not the one on your Mac
+        sync: false
+
+databases:
+  - name: ledgerlet-db
+    plan: free
+    region: frankfurt
+    databaseName: ledgerlet
+    user: ledgerlet
+    postgresMajorVersion: "16"
+    ipAllowList: [] # reachable only from the service, never from the internet
