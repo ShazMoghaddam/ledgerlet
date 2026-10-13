@@ -93,15 +93,17 @@ export function PrivacyPage() {
           your email address and sign-in details, and tells LedgerLet who you are.
         </li>
         <li>
-          <strong>Our hosting provider</strong>, which runs LedgerLet and stores its data. We’ll
-          name it on this page before LedgerLet opens to the public.
+          <strong>Render</strong> (Render Services, Inc.), which runs LedgerLet and stores its
+          database in Frankfurt, Germany.
         </li>
       </ul>
       <p>
-        Service providers may only use your data to provide their service to us. We aim to keep your
-        data in the UK. If a provider stores any of it elsewhere, it will be protected by UK
-        adequacy regulations or the safeguards the Information Commissioner’s Office approves, and
-        this page will say so.
+        Service providers may only use your data to provide their service to us. LedgerLet’s
+        database is in Germany, which UK law recognises as protecting personal data to the same
+        standard as the UK. Render and Auth0 are US companies, so their staff may sometimes reach
+        your data from the US, for example to keep their service running. Those transfers are
+        protected by the UK Extension to the EU-US Data Privacy Framework, or by the standard
+        contractual clauses the Information Commissioner’s Office approves.
       </p>
 
       <h2>In your browser</h2>
