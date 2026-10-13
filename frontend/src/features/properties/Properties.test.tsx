@@ -59,6 +59,8 @@ describe("Properties", () => {
     expect(
       await screen.findByRole("heading", { name: "Add your first property" }),
     ).toBeInTheDocument();
+    // One way to add it, not two identical buttons.
+    expect(screen.getAllByRole("link", { name: /Add a property/ })).toHaveLength(1);
   });
 });
 

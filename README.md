@@ -233,6 +233,9 @@ in Auth0's dashboard and in settings; no code changes. One-time setup:
    sign-in data is held there).
 2. **Create an API** (Applications › APIs): name `LedgerLet API`, identifier
    `https://api.ledgerlet.app`, signing algorithm RS256. The identifier is the audience.
+   In the API's **Settings › Access Settings**, turn on **Allow Skipping User
+   Consent**, so landlords aren't asked to approve LedgerLet's access to its own API.
+   Don't use Auth0's Management API (`…/api/v2/`) for any of this.
 3. **Create an application** (Applications › Applications), type *Single Page
    Application*. In its settings add, for local development and for each deployed
    address:
@@ -240,6 +243,10 @@ in Auth0's dashboard and in settings; no code changes. One-time setup:
    - Allowed Logout URLs: `http://localhost:5173/sign-in`
    - Allowed Web Origins: `http://localhost:5173`
    - Refresh Token Rotation: on.
+
+   Then let the application call the API: in the LedgerLet API, open **Application
+   Access**, find the application, and under **User-Delegated Access** choose
+   **Grant Access**. Without it, sign-in ends with "Client not authorized".
 4. **Add the email to access tokens** (Actions › Library › Create Action, trigger
    *Post Login*), then add it to the Login flow:
 

@@ -16,6 +16,7 @@ import {
   taxYearPath,
 } from "../../lib/taxYear";
 import { NotFoundPage } from "../notFound/NotFoundPage";
+import { NoProperties, useHasNoProperties } from "./NoProperties";
 import { QuarterStatus } from "./QuarterStatus";
 import s from "./Tax.module.css";
 
@@ -31,6 +32,7 @@ function TaxYear({ year, today }: { year: number; today: string }) {
   const label = `Tax year ${taxYearLabel(year)}`;
   usePageTitle(label);
   const thisYear = taxYearOf(today);
+  const noProperties = useHasNoProperties();
 
   if (year < FIRST_TAX_YEAR || year > thisYear)
     return (
@@ -54,7 +56,7 @@ function TaxYear({ year, today }: { year: number; today: string }) {
       <h1 id="page-heading" tabIndex={-1}>
         {label}
       </h1>
-      <YearContents year={year} today={today} />
+      {noProperties ? <NoProperties /> : <YearContents year={year} today={today} />}
       <OtherYears year={year} thisYear={thisYear} today={today} />
     </div>
   );
