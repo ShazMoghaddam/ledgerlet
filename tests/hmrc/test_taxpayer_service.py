@@ -7,7 +7,12 @@ import pytest
 from app.core.exceptions import UpstreamError
 from app.modules.hmrc.crypto import TokenCipher
 from app.modules.hmrc.service import HmrcNotConnectedError
-from app.modules.hmrc.taxpayer import HmrcProfileMissingError, HmrcTaxpayerService
+from app.modules.hmrc.taxpayer import (
+    HmrcApiError,
+    HmrcProfileMissingError,
+    HmrcTaxpayerService,
+    SandboxOnlyError,
+)
 from tests.hmrc.fakes import TEST_TOKEN_KEY, FakeHmrcApi, FakeTaxpayerRepository, FakeTokens
 
 FRAUD = {"Gov-Client-Connection-Method": "WEB_APP_VIA_SERVER"}
@@ -232,3 +237,32 @@ def test_sandbox_dynamic_mode_matches_what_hmrc_actually_returns(
     call = api.calls[-1]
     assert call["params"] == {}  # the sandbox rejects every filter in DYNAMIC mode
     assert call["test_scenario"] == "DYNAMIC"
+
+
+def test_sandbox_can_create_a_test_property_business(
+    repo, tokens, api, cipher, landlord_id
+) -> None:
+    service = HmrcTaxpayerService(repo, tokens, api, cipher, sandbox=True)
+    service.set_nino(landlord_id, "OE180677A")
+    api.businesses = []  # HMRC deleted the old one after 7 days
+    _, taxpayer = service.create_test_property_business(landlord_id, FRAUD, 2026)
+    post = next(c for c in api.calls if c.get("method") == "POST")
+    assert post["path"] == "/individuals/self-assessment-test-support/business/OE180677A"
+    assert post["body"]["quarterlyTypeChoice"]["taxYearOfChoice"] == "2026-27"
+    assert post["body"]["firstAccountingPeriodStartDate"] == "2026-04-06"
+    assert taxpayer.uk_property_business_id == "XPIS99999999999"  # found and selected
+
+
+def test_test_businesses_are_never_made_outside_the_sandbox(service, api, landlord_id) -> None:
+    service.set_nino(landlord_id, "OE180677A")
+    with pytest.raises(SandboxOnlyError):
+        service.create_test_property_business(landlord_id, FRAUD, 2026)
+    assert api.calls == []
+
+
+def test_a_refused_test_business_names_hmrcs_reason(repo, tokens, api, cipher, landlord_id) -> None:
+    service = HmrcTaxpayerService(repo, tokens, api, cipher, sandbox=True)
+    service.set_nino(landlord_id, "OE180677A")
+    api.post_response = (400, {"code": "RULE_TYPE_OF_BUSINESS_INCORRECT", "message": "No"})
+    with pytest.raises(HmrcApiError, match="RULE_TYPE_OF_BUSINESS_INCORRECT"):
+        service.create_test_property_business(landlord_id, FRAUD, 2026)

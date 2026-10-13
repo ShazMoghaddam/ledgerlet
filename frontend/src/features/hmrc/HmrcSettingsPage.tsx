@@ -14,6 +14,7 @@ import { formatLong } from "../../lib/dates";
 import {
   useConnect,
   useDisconnect,
+  useCreateTestBusiness,
   useDiscoverBusinesses,
   useSetBusiness,
   useSetNino,
@@ -198,7 +199,7 @@ function DetailsSection({ connected, comeBackTo }: { connected: boolean; comeBac
       <LoadFailed what="your details at HMRC" error={taxpayer.error} retry={taxpayer.refetch} />
     );
 
-  const { nino, uk_property_business_id: business } = taxpayer.data;
+  const { nino, uk_property_business_id: business, sandbox } = taxpayer.data;
   const ready = connected && Boolean(nino && business);
 
   return (
@@ -231,7 +232,7 @@ function DetailsSection({ connected, comeBackTo }: { connected: boolean; comeBac
         ) : !connected ? (
           <p className={s.muted}>Connect to HMRC first, then LedgerLet can find it.</p>
         ) : (
-          <FindBusiness />
+          <FindBusiness sandbox={sandbox === true} />
         )}
       </div>
 
@@ -313,8 +314,34 @@ function NinoForm({ changing, onDone }: { changing: boolean; onDone: () => void 
   );
 }
 
+/**
+ * HMRC's test service only. Test users don't come with a property business, and HMRC
+ * deletes the ones it makes after 7 days, so a demo needs a way to make another.
+ */
+function CreateTestBusiness() {
+  const create = useCreateTestBusiness();
+  return (
+    <div className={s.sandboxNote}>
+      <p>
+        <strong>Using HMRC’s test service.</strong> Test users need a property business made for
+        them, and HMRC removes it after 7 days. LedgerLet can make a new one.
+      </p>
+      <div>
+        <Button variant="secondary" disabled={create.isPending} onClick={() => create.mutate()}>
+          {create.isPending ? "Asking HMRC…" : "Create a test property business"}
+        </Button>
+      </div>
+      {create.isError && (
+        <p role="alert" className={s.problem}>
+          {create.error.message}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /** Ask HMRC. One UK property business is chosen automatically; several, the landlord picks. */
-function FindBusiness() {
+function FindBusiness({ sandbox }: { sandbox: boolean }) {
   const discover = useDiscoverBusinesses();
   const choose = useSetBusiness();
   const found = discover.data;
@@ -347,6 +374,7 @@ function FindBusiness() {
           above, or register your property income with HMRC first.
         </p>
       )}
+      {found && property.length === 0 && sandbox && <CreateTestBusiness />}
       {found && property.length > 1 && !found.selected_business_id && (
         <ChooseBusiness
           businesses={property}

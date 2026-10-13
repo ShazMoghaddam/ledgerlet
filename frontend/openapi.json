@@ -1539,6 +1539,61 @@
         }
       }
     },
+    "/api/v1/hmrc/sandbox/property-business": {
+      "post": {
+        "tags": [
+          "hmrc"
+        ],
+        "summary": "Create Test Property Business",
+        "description": "HMRC's sandbox only (404 otherwise): give the test user a UK property business.\n\nHMRC deletes sandbox test businesses after 7 days; this makes another and selects it.",
+        "operationId": "create_test_property_business_api_v1_hmrc_sandbox_property_business_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-ledgerlet-device",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Ledgerlet-Device"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/hmrc/obligations": {
       "get": {
         "tags": [
@@ -3157,6 +3212,11 @@
               }
             ],
             "title": "Uk Property Business Id"
+          },
+          "sandbox": {
+            "type": "boolean",
+            "title": "Sandbox",
+            "default": false
           }
         },
         "type": "object",

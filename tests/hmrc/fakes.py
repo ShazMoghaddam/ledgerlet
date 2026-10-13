@@ -127,6 +127,7 @@ class FakeHmrcApi:
         self.fail_with: tuple[int, dict] | None = None
         self.extra_groups: list[dict] = []  # other businesses' obligations HMRC may include
         self.put_response: tuple[int, dict] = (204, {})
+        self.post_response: tuple[int, dict] = (201, {"businessId": "XPIS99999999999"})
 
     def get(self, path, version, access_token, fraud_headers, params=None, test_scenario=None):
         self.calls.append(
@@ -173,6 +174,25 @@ class FakeHmrcApi:
         )
         status, response_body = self.put_response
         return self._make(status, response_body, "corr-put")
+
+    def post(self, path, version, access_token, fraud_headers, body):
+        self.calls.append(
+            {
+                "method": "POST",
+                "path": path,
+                "version": version,
+                "token": access_token,
+                "fraud_headers": dict(fraud_headers),
+                "body": body,
+            }
+        )
+        status, response_body = self.post_response
+        if status < 300 and body.get("typeOfBusiness") == "uk-property":
+            # Like the sandbox: the new business shows up in the next discovery.
+            self.businesses = [
+                b for b in self.businesses if b["typeOfBusiness"] != "uk-property"
+            ] + [{"typeOfBusiness": "uk-property", "businessId": response_body["businessId"]}]
+        return self._make(status, response_body, "corr-post")
 
 
 class FakeSubmissionRepository:
