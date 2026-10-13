@@ -10,19 +10,25 @@ import { RouterProvider, createBrowserRouter } from "react-router";
 
 import { makeQueryClient } from "./app/queryClient";
 import { routes } from "./app/routes";
-import { getToken, subscribe } from "./auth/session";
+import { initSession, isSignedIn, subscribe } from "./auth/session";
 
 const router = createBrowserRouter(routes);
 const queryClient = makeQueryClient();
 // Signing out forgets everything fetched, so the next person on this device sees nothing of it.
 subscribe(() => {
-  if (!getToken()) queryClient.clear();
+  if (!isSignedIn()) queryClient.clear();
 });
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
-);
+// Find out whether there's a session first, so a signed-in landlord never sees the
+// sign-in page flash up on a refresh.
+void initSession()
+  .catch((error: unknown) => console.error("Couldn’t check the sign-in", error))
+  .then(() =>
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </StrictMode>,
+    ),
+  );

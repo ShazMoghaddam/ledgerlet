@@ -9,7 +9,7 @@ import s from "./Legal.module.css";
  */
 export function PrivacyPage() {
   return (
-    <LegalPage title="Privacy notice" updated="2026-10-12">
+    <LegalPage title="Privacy notice" updated="2026-10-13">
       <div className={s.summary}>
         <strong>In short</strong>
         <ul>
@@ -89,21 +89,25 @@ export function PrivacyPage() {
           uses it under its own privacy notice.
         </li>
         <li>
-          <strong>Our service providers</strong>: the company that hosts LedgerLet and stores its
-          data, and the company that runs sign-in. They may only use your data to provide their
-          service to us. We’ll name them on this page before LedgerLet opens to the public.
+          <strong>Auth0</strong> (part of Okta), which runs sign-in from its UK region. It holds
+          your email address and sign-in details, and tells LedgerLet who you are.
+        </li>
+        <li>
+          <strong>Our hosting provider</strong>, which runs LedgerLet and stores its data. We’ll
+          name it on this page before LedgerLet opens to the public.
         </li>
       </ul>
       <p>
-        We aim to keep your data in the UK. If a provider stores any of it elsewhere, it will be
-        protected by UK adequacy regulations or the safeguards the Information Commissioner’s Office
-        approves, and this page will say so.
+        Service providers may only use your data to provide their service to us. We aim to keep your
+        data in the UK. If a provider stores any of it elsewhere, it will be protected by UK
+        adequacy regulations or the safeguards the Information Commissioner’s Office approves, and
+        this page will say so.
       </p>
 
       <h2>In your browser</h2>
       <p>LedgerLet stores three small things in your browser, all needed for it to work:</p>
       <ul>
-        <li>your sign-in, which is removed when you close the tab;</li>
+        <li>your sign-in, kept until you sign out, so you stay signed in on this device;</li>
         <li>
           the random browser ID HMRC asks for (see above), kept so it stays the same each time;
         </li>

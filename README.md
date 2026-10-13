@@ -114,7 +114,7 @@ the HTTP error mapping, and sign-in token verification).
 
 ## Open choices
 
-- Which identity provider to use in production (decided with the frontend)
+- Hosting for production (Render for the demo)
 
 ## Dependencies
 
@@ -223,6 +223,47 @@ cd frontend && npm run api:types              # TypeScript types from openapi.js
 | Sign-in token in sessionStorage, behind one small module | Gone when the tab closes; swapping in the identity provider touches one file |
 | Signing out clears every cached response | The next person on the device sees nothing of the last |
 | Browser tests at 390, 834 and 1440 px with axe | Responsive layout, tap targets and accessibility are checked, not assumed |
+
+## Sign-in with Auth0
+
+LedgerLet checks standard signed tokens (see `app/core/auth.py`), so Auth0 is set up
+in Auth0's dashboard and in settings; no code changes. One-time setup:
+
+1. **Create a tenant** in Auth0 and choose the **UK** region (the privacy notice says
+   sign-in data is held there).
+2. **Create an API** (Applications › APIs): name `LedgerLet API`, identifier
+   `https://api.ledgerlet.app`, signing algorithm RS256. The identifier is the audience.
+3. **Create an application** (Applications › Applications), type *Single Page
+   Application*. In its settings add, for local development and for each deployed
+   address:
+   - Allowed Callback URLs: `http://localhost:5173/sign-in/callback`
+   - Allowed Logout URLs: `http://localhost:5173/sign-in`
+   - Allowed Web Origins: `http://localhost:5173`
+   - Refresh Token Rotation: on.
+4. **Add the email to access tokens** (Actions › Library › Create Action, trigger
+   *Post Login*), then add it to the Login flow:
+
+   ```js
+   exports.onExecutePostLogin = async (event, api) => {
+     api.accessToken.setCustomClaim("https://ledgerlet.app/email", event.user.email);
+   };
+   ```
+5. **Settings.** Backend `.env`:
+
+   ```
+   LEDGERLET_AUTH_ISSUER=https://YOUR-TENANT.uk.auth0.com/
+   LEDGERLET_AUTH_AUDIENCE=https://api.ledgerlet.app
+   LEDGERLET_AUTH_JWKS_URL=https://YOUR-TENANT.uk.auth0.com/.well-known/jwks.json
+   LEDGERLET_AUTH_EMAIL_CLAIM=https://ledgerlet.app/email
+   ```
+
+   (Remove `LEDGERLET_AUTH_JWKS_FILE`. The issuer ends with a `/`, as Auth0 writes it.)
+   Frontend `frontend/.env.local` (see `frontend/.env.example`): the tenant domain, the
+   application's client ID and the API identifier.
+
+Without the frontend settings, the sign-in page keeps the development token box, so
+tests and local work don't need Auth0. A landlord who signed in with a development
+token is a different landlord from the same person through Auth0 (a different issuer).
 
 ## HMRC sandbox (local development)
 

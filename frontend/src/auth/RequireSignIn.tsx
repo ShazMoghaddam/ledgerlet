@@ -1,11 +1,11 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 
-import { useToken } from "./useSession";
+import { useSignedIn } from "./useSession";
 
 export function RequireSignIn() {
-  const token = useToken();
+  const signedIn = useSignedIn();
   const location = useLocation();
-  if (!token) {
+  if (!signedIn) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/sign-in?next=${next}`} replace />;
   }

@@ -8,3 +8,6 @@ __pycache__/
 .DS_Store
 .dev-auth/
 .dev-hmrc/
+
+# Local frontend settings (Vite)
+*.local

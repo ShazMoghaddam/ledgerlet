@@ -72,10 +72,13 @@ class JwksUrlKeySource:
 
 
 class TokenVerifier:
-    def __init__(self, issuer: str, audience: str, key_source: KeySource) -> None:
+    def __init__(
+        self, issuer: str, audience: str, key_source: KeySource, email_claim: str = "email"
+    ) -> None:
         self._issuer = issuer
         self._audience = audience
         self._keys = key_source
+        self._email_claim = email_claim
 
     def verify(self, token: str) -> VerifiedIdentity:
         try:
@@ -96,7 +99,7 @@ class TokenVerifier:
         subject = claims.get("sub")
         if not isinstance(subject, str) or not subject:
             raise InvalidTokenError("Token subject is empty")
-        email = claims.get("email")
+        email = claims.get(self._email_claim)
         return VerifiedIdentity(
             issuer=self._issuer,
             subject=subject,
@@ -118,4 +121,6 @@ def get_token_verifier() -> TokenVerifier:
         if settings.auth_jwks_url
         else StaticKeySource.from_file(settings.auth_jwks_file or "")
     )
-    return TokenVerifier(settings.auth_issuer, settings.auth_audience, source)
+    return TokenVerifier(
+        settings.auth_issuer, settings.auth_audience, source, settings.auth_email_claim
+    )

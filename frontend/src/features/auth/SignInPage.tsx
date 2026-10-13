@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 
-import { signIn } from "../../auth/session";
-import { safeNext, useToken } from "../../auth/useSession";
+import { signIn, signInMethod, startSignIn } from "../../auth/session";
+import { safeNext, useSignedIn } from "../../auth/useSession";
 import { Button } from "../../components/Button";
 import { Mark } from "../../components/Mark";
 import { LegalFooter } from "../legal/LegalPage";
@@ -10,17 +10,16 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 import s from "./SignInPage.module.css";
 
 /**
- * Development sign-in: paste a token from scripts/dev_auth.py.
- *
- * Production will send the landlord to the chosen identity provider instead. Until
- * that's chosen, a production build says so rather than offering a token box.
+ * Sign in. With Auth0, a button that goes to Auth0's own sign-in page (where new
+ * landlords can also create an account). In local development, a box for a token
+ * from scripts/dev_auth.py. A build with neither says so rather than pretending.
  */
 export function SignInPage() {
   usePageTitle("Sign in");
-  const token = useToken();
+  const signedIn = useSignedIn();
   const [params] = useSearchParams();
   const next = safeNext(params.get("next"));
-  if (token) return <Navigate to={next} replace />;
+  if (signedIn) return <Navigate to={next} replace />;
 
   return (
     <main className={s.page}>
@@ -32,10 +31,45 @@ export function SignInPage() {
         <h1 id="page-heading" tabIndex={-1}>
           Sign in
         </h1>
-        {import.meta.env.DEV ? <DevTokenForm next={next} /> : <p>Sign-in isn’t available yet.</p>}
+        {signInMethod === "auth0" ? (
+          <Auth0SignIn next={next} />
+        ) : signInMethod === "dev-token" ? (
+          <DevTokenForm next={next} />
+        ) : (
+          <p>Sign-in isn’t available yet.</p>
+        )}
       </div>
       <LegalFooter />
     </main>
+  );
+}
+
+function Auth0SignIn({ next }: { next: string }) {
+  const [going, setGoing] = useState(false);
+  const [failed, setFailed] = useState(false);
+  return (
+    <div style={{ display: "grid", gap: "var(--space-4)" }}>
+      <p>Sign in, or create an account if you’re new. It only takes your email address.</p>
+      {failed && (
+        <p role="alert" className={s.error}>
+          Couldn’t reach the sign-in page. Check your connection and try again.
+        </p>
+      )}
+      <Button
+        size="large"
+        disabled={going}
+        onClick={() => {
+          setGoing(true);
+          setFailed(false);
+          startSignIn(next).catch(() => {
+            setGoing(false);
+            setFailed(true);
+          });
+        }}
+      >
+        {going ? "Going to sign-in…" : "Continue to sign in"}
+      </Button>
+    </div>
   );
 }
 
