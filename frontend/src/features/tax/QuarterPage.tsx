@@ -26,6 +26,7 @@ import {
 } from "../../lib/taxYear";
 import { NotFoundPage } from "../notFound/NotFoundPage";
 import { Checklist } from "./Checklist";
+import { NoProperties, useHasNoProperties } from "./NoProperties";
 import { hmrcSettingsPath, useReadiness } from "./readiness";
 import s from "./Tax.module.css";
 
@@ -50,6 +51,7 @@ function QuarterView({ year, quarter, today }: { year: number; quarter: number; 
   const obligations = useObligations(year);
   const submissions = useSubmissions(year);
   const summary = useSummary(year, quarter);
+  const noProperties = useHasNoProperties();
 
   const quarters = obligations.data
     ? quarterStates(obligations.data.obligations, submissions.data ?? [], today)
@@ -92,7 +94,9 @@ function QuarterView({ year, quarter, today }: { year: number; quarter: number; 
         </nav>
       </header>
 
-      {obligations.isPending ? (
+      {noProperties ? (
+        <NoProperties />
+      ) : obligations.isPending ? (
         <Loading label="the quarter" />
       ) : obligations.isError ? (
         <LoadFailed what="the quarter" error={obligations.error} retry={obligations.refetch} />

@@ -24,10 +24,13 @@ export function PropertiesPage() {
         <h1 id="page-heading" tabIndex={-1}>
           Properties
         </h1>
-        <ButtonLink to="/properties/new">
-          <PlusIcon size={18} />
-          Add a property
-        </ButtonLink>
+        {/* An empty list has its own, larger button: one is enough. */}
+        {properties.data?.length !== 0 && (
+          <ButtonLink to="/properties/new">
+            <PlusIcon size={18} />
+            Add a property
+          </ButtonLink>
+        )}
       </div>
       {properties.isPending ? (
         <Loading label="your properties" />

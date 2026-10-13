@@ -44,6 +44,12 @@ export function Statement({ totals: t, whose }: { totals: Totals; whose: string 
   );
 }
 
-/** "your property", "both properties", "all 3 properties". */
+/** "your property", "both properties", "all 3 properties"; "your properties" for none yet. */
 export const whoseProperties = (count: number) =>
-  count === 1 ? "your property" : count === 2 ? "both properties" : `all ${count} properties`;
+  count === 0
+    ? "your properties"
+    : count === 1
+      ? "your property"
+      : count === 2
+        ? "both properties"
+        : `all ${count} properties`;

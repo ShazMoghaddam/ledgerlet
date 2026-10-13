@@ -11,12 +11,12 @@ import s from "./SignInPage.module.css";
 export function CallbackPage() {
   usePageTitle("Signing in");
   const navigate = useNavigate();
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<string>();
 
   useEffect(() => {
     finishSignIn()
       .then((next) => navigate(safeNext(next), { replace: true, state: { signedIn: true } }))
-      .catch(() => setFailed(true));
+      .catch((err: unknown) => setFailed(callbackError(err)));
   }, [navigate]);
 
   return (
@@ -31,11 +31,25 @@ export function CallbackPage() {
         </h1>
         {failed && (
           <p role="alert">
-            The sign-in link may have expired or already been used.{" "}
-            <Link to="/sign-in">Try signing in again</Link>.
+            {failed} <Link to="/sign-in">Try signing in again</Link>.
           </p>
         )}
       </div>
     </main>
   );
+}
+
+/**
+ * Why sign-in didn't finish, in words the landlord can act on. Auth0 reports its
+ * reason as `error` and `error_description` (on the thrown error, from the address).
+ */
+export function callbackError(err: unknown): string {
+  const { error, error_description: description } = (err ?? {}) as {
+    error?: unknown;
+    error_description?: unknown;
+  };
+  if (error === "access_denied" && !description) return "You chose not to give LedgerLet access.";
+  if (typeof description === "string" && description.trim())
+    return `The sign-in service said: “${description.trim().replace(/[.\s]+$/, "")}.”`;
+  return "The sign-in link may have expired or already been used.";
 }

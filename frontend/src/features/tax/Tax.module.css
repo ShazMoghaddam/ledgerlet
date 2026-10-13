@@ -503,3 +503,8 @@ a.quarterRow .quarterName {
     background: none;
   }
 }
+
+.empty {
+  gap: var(--space-4);
+  max-width: 36rem;
+}

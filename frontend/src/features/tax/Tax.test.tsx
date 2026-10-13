@@ -199,3 +199,37 @@ describe("Quarter", () => {
     expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("Page not found");
   });
 });
+
+describe("A new account, with no properties", () => {
+  beforeEach(() => server.use(http.get("/api/v1/properties", () => HttpResponse.json([]))));
+
+  it("asks for a first property instead of calling quarters ready or overdue", async () => {
+    renderApp("/tax", { width: LAPTOP });
+    expect(
+      await screen.findByRole("heading", { name: "Add your first property" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Add a property" })).toHaveAttribute(
+      "href",
+      "/properties/new",
+    );
+    expect(screen.queryByText("Ready to send")).not.toBeInTheDocument();
+    expect(screen.queryByText("Overdue")).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("does the same on a quarter and on its send page", async () => {
+    renderApp("/tax/2026/q2");
+    expect(
+      await screen.findByRole("heading", { name: "Add your first property" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Ready to send" })).not.toBeInTheDocument();
+  });
+
+  it("has nothing to send yet", async () => {
+    renderApp("/tax/2026/q2/submit");
+    expect(
+      await screen.findByRole("heading", { name: "Add your first property" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Send/ })).not.toBeInTheDocument();
+  });
+});

@@ -23,6 +23,7 @@ import {
 } from "../../lib/taxYear";
 import { NotFoundPage } from "../notFound/NotFoundPage";
 import { Checklist } from "../tax/Checklist";
+import { NoProperties, useHasNoProperties } from "../tax/NoProperties";
 import { hmrcSettingsPath, useReadiness } from "../tax/readiness";
 import { usePreviewUpdate, useSendUpdate } from "./mutations";
 import { sentFigures } from "./sentFigures";
@@ -69,6 +70,17 @@ function Submit({
   const obligations = useObligations(year);
   const submissions = useSubmissions(year);
   const summary = useSummary(year, quarter);
+  const noProperties = useHasNoProperties();
+
+  if (noProperties)
+    return (
+      <Frame year={year} quarter={quarter}>
+        <h1 id="page-heading" tabIndex={-1}>
+          Send quarter {quarter}
+        </h1>
+        <NoProperties />
+      </Frame>
+    );
 
   const failed = [obligations, submissions, summary].find((x) => x.isError);
   if (failed)
