@@ -2,6 +2,7 @@
 # Backend: lint, tests on SQLite, migrations, tests on Postgres.
 # Frontend: lint, format, types, unit tests, build, browser tests.
 # Contract: the frontend is built against the API as it is now.
+# Image: the production Docker image builds, starts and serves.
 
 name: CI
 
@@ -157,3 +158,56 @@ jobs:
 
       - name: The frontend is built against the current API
         run: git diff --exit-code -- frontend/openapi.json frontend/src/api/schema.d.ts frontend/src/test/fixtures
+
+  image:
+    # Builds the production image (as Render will) and checks it actually runs:
+    # migrations apply on start, the web app is served, the API answers.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ledgerlet
+          POSTGRES_PASSWORD: ledgerlet
+          POSTGRES_DB: ledgerlet
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ledgerlet"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build
+        run: docker build -t ledgerlet .
+
+      - name: Start, the way Render starts it
+        run: |
+          docker run -d --name app --network host \
+            -e PORT=10000 \
+            -e LEDGERLET_ENVIRONMENT=production \
+            -e RENDER_EXTERNAL_URL=https://ledgerlet.example \
+            -e LEDGERLET_DATABASE_URL=postgresql://ledgerlet:ledgerlet@localhost:5432/ledgerlet \
+            -e LEDGERLET_AUTH_ISSUER=https://example.invalid/ \
+            -e LEDGERLET_AUTH_JWKS_URL=https://example.invalid/.well-known/jwks.json \
+            ledgerlet
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:10000/health && break
+            sleep 1
+          done
+          docker logs app
+
+      - name: It serves the web app, the API, and runs as a non-root user
+        run: |
+          set -e
+          curl -sf http://localhost:10000/health
+          curl -sf http://localhost:10000/tax/2026/q2 | grep -q '<div id="root">'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:10000/api/v1/me)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:10000/api/v1/nope)" = 404
+          curl -sI http://localhost:10000/ | grep -qi '^strict-transport-security'
+          test "$(docker exec app id -u)" = 10001

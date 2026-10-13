@@ -1,0 +1,23 @@
+# Only what the image needs; never secrets or local state.
+.git
+.github
+.env
+.env.*
+!.env.example
+*.local
+.dev-auth
+.dev-hmrc
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.ruff_cache
+*.egg-info
+tests
+scripts
+docker-compose.yml
+frontend/node_modules
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+frontend/e2e

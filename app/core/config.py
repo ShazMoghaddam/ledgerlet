@@ -4,6 +4,7 @@ Every setting is prefixed with LEDGERLET_, e.g. LEDGERLET_DATABASE_URL.
 Nothing else in the codebase reads os.environ directly: it asks for Settings.
 """
 
+import os
 from functools import lru_cache
 from typing import Self
 
@@ -50,10 +51,33 @@ class Settings(BaseSettings):
     hmrc_obligations_test_scenario: str | None = None
     trust_proxy_headers: bool = False
 
+    # The built web app, served by the API from the same address (one service, so no
+    # CORS and the HMRC cookie works). Unset in development, where Vite serves it.
+    static_dir: str | None = None
+
     @model_validator(mode="after")
     def _no_dev_keys_in_production(self) -> Self:
         if self.environment == "production" and self.auth_jwks_file:
             raise ValueError("auth_jwks_file is for local development only")
+        return self
+
+    @model_validator(mode="after")
+    def _hosting_defaults(self) -> Self:
+        """Fill in what the host already knows, unless set explicitly.
+
+        Hosts such as Render give the database as postgres://… or postgresql://…;
+        SQLAlchemy needs the driver named. Render also says the public address
+        (RENDER_EXTERNAL_URL), which is where HMRC must send the browser back.
+        """
+        for prefix in ("postgres://", "postgresql://"):
+            if self.database_url.startswith(prefix):
+                self.database_url = "postgresql+psycopg://" + self.database_url[len(prefix) :]
+        external = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+        if external:
+            if "app_base_url" not in self.model_fields_set:
+                self.app_base_url = external
+            if "hmrc_redirect_uri" not in self.model_fields_set:
+                self.hmrc_redirect_uri = f"{external}/api/v1/hmrc/callback"
         return self
 
 

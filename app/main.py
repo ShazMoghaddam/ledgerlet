@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.core.config import get_settings
 from app.core.error_handlers import register_error_handlers
+from app.core.web import add_security_headers, mount_web_app
 from app.modules.hmrc.router import router as hmrc_router
 from app.modules.imports.router import router as imports_router
 from app.modules.landlords.router import router as me_router
@@ -29,6 +30,11 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["meta"])
     def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    add_security_headers(app, https=settings.app_base_url.startswith("https://"))
+    # Last: it answers every path the API doesn't.
+    if settings.static_dir:
+        mount_web_app(app, settings.static_dir)
 
     return app
 

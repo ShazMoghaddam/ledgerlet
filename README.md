@@ -265,6 +265,38 @@ Without the frontend settings, the sign-in page keeps the development token box,
 tests and local work don't need Auth0. A landlord who signed in with a development
 token is a different landlord from the same person through Auth0 (a different issuer).
 
+## Deploying to Render (demo)
+
+Production is one Docker image (`Dockerfile`): the web app is built, then served by
+the API from the same address, so there's no CORS and HMRC's sign-in cookie works.
+On start it applies any new migrations (`docker/start.sh`). CI builds the same image
+and checks it runs. `render.yaml` describes the Render setup.
+
+1. **Auth0 first** (see above). Add the Render address to the application's
+   Allowed Callback URLs (`https://ledgerlet.onrender.com/sign-in/callback`), Logout
+   URLs (`https://ledgerlet.onrender.com/sign-in`) and Web Origins
+   (`https://ledgerlet.onrender.com`). If Render gives the service a different
+   address, use that instead.
+2. **HMRC Developer Hub:** add `https://ledgerlet.onrender.com/api/v1/hmrc/callback`
+   to your sandbox application's redirect URIs.
+3. **Render:** New > Blueprint, connect the GitHub repo, and fill in the values it
+   asks for: the Auth0 issuer, JWKS URL, domain and client ID; the HMRC client ID and
+   secret; and a **new** HMRC token key:
+
+   ```bash
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+4. Render builds and deploys. After that, every merge to `main` deploys once CI
+   passes.
+
+The app's public address and HMRC's redirect URI are taken from Render's
+`RENDER_EXTERNAL_URL`; set `LEDGERLET_APP_BASE_URL` and `LEDGERLET_HMRC_REDIRECT_URI`
+only for a custom domain.
+
+The free plans are for a demo: the service sleeps after 15 minutes idle (about a
+minute to wake), and the free database is deleted 30 days after it's created. Move
+both to paid plans before anyone relies on it.
+
 ## HMRC sandbox (local development)
 
 1. Register at the HMRC Developer Hub, create a sandbox application, and subscribe it to
