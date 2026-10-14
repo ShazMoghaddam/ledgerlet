@@ -3,6 +3,9 @@
 Making Tax Digital platform for UK landlords. Working name, pending a UK IPO
 trademark and Companies House check.
 
+Built in London by [Shaz Moghaddam](https://shazmoghaddam.github.io/).
+Live demo, on HMRC's sandbox: [ledgerlet.onrender.com](https://ledgerlet.onrender.com)
+
 ## Architecture
 
 A **modular monolith**: one deployable FastAPI app, organised by business
@@ -362,7 +365,23 @@ backend and fails if they've changed without being committed.
    - 6a. API for the frontend: cross-property transactions, HMRC return to the app, sample data (done)
    - 6b. Frontend foundation: design tokens, app shell and navigation at every screen size, Overview (done)
    - 6c-i. Transactions: list, filters, detail, add, edit, delete (done)
-   - 6c-ii. CSV import (this phase)
-   - 6c-iii. Tax year and quarter pages
-   - 6c-iv. Review and submit to HMRC, and the HMRC connection page
-7. Open banking as a second transaction source
+   - 6c-ii. CSV import (done)
+   - 6c-iii. Tax year and quarter pages (done)
+   - 6c-iv. Review and submit to HMRC, and the HMRC connection page (done)
+   - 6d. Properties, Settings, privacy notice and terms (done)
+7. Real sign-in (Auth0, UK region) and the Render demo, end to end on HMRC's sandbox (done)
+8. Before real landlords: Google sign-in keys of our own, ICO registration, HMRC production access
+9. Open banking as a second transaction source
+
+## Author
+
+**Shaz Moghaddam**, London, UK
+
+[shazmoghaddam.github.io](https://shazmoghaddam.github.io/) ·
+[LinkedIn](https://www.linkedin.com/in/shazmoghaddam) ·
+[GitHub](https://github.com/ShazMoghaddam)
+
+## Licence
+
+Copyright © 2026 Shaz Moghaddam. All rights reserved. This is proprietary software,
+not open source: see [LICENSE](LICENSE).
